@@ -2,7 +2,13 @@
 const API_URL = 'http://localhost:3000/api/menu';
 
 // État de l'application
-let currentAnalysis = null;
+let allAnalyses = []; // Stocke toutes les analyses
+let currentAnalysisIndex = 0; // Index de l'analyse actuellement affichée
+
+// Instances des graphiques Chart.js
+let nutritionChartInstance = null;
+let co2ChartInstance = null;
+let costChartInstance = null;
 
 // Éléments DOM
 const uploadSection = document.getElementById('uploadSection');
@@ -16,11 +22,13 @@ const analyzeBtn = document.getElementById('analyzeBtn');
 const newAnalysisBtn = document.getElementById('newAnalysisBtn');
 const loadingText = document.getElementById('loadingText');
 const toast = document.getElementById('toast');
+const languageToggle = document.getElementById('languageToggle');
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     checkAPIHealth();
+    updatePageLanguage(); // Initialiser la langue
 });
 
 // Configuration des écouteurs d'événements
@@ -46,6 +54,16 @@ function setupEventListeners() {
     // Actions
     document.getElementById('downloadBtn')?.addEventListener('click', downloadReport);
     document.getElementById('shareBtn')?.addEventListener('click', shareResults);
+    
+    // Changement de langue
+    languageToggle.addEventListener('click', toggleLanguage);
+}
+
+// Fonction pour changer la langue
+function toggleLanguage() {
+    const newLang = getCurrentLanguage() === 'fr' ? 'en' : 'fr';
+    setLanguage(newLang);
+    showToast(newLang === 'fr' ? '🇫🇷 Français' : '🇬🇧 English', 'success');
 }
 
 // Vérification de l'état de l'API
@@ -57,12 +75,12 @@ async function checkAPIHealth() {
         if (data.status === 'ok') {
             console.log('✅ API connectée');
             if (data.services.blackbox === 'not_configured') {
-                showToast('⚠️ Mode démo activé (API Blackbox non configurée)', 'warning');
+                showToast(t('toastDemoMode'), 'warning');
             }
         }
     } catch (error) {
         console.error('❌ API non disponible:', error);
-        showToast('❌ Impossible de se connecter à l\'API', 'error');
+        showToast(t('toastApiError'), 'error');
     }
 }
 
@@ -99,24 +117,24 @@ function handleFileSelect(e) {
 async function handleFile(file) {
     // Validation
     if (!file.type.startsWith('image/')) {
-        showToast('❌ Veuillez sélectionner une image', 'error');
+        showToast(t('toastSelectImage'), 'error');
         return;
     }
     
     if (file.size > 10 * 1024 * 1024) {
-        showToast('❌ L\'image est trop volumineuse (max 10MB)', 'error');
+        showToast(t('toastImageTooLarge'), 'error');
         return;
     }
     
     // Afficher le loading
-    showLoading('Scan de l\'image en cours...');
+    showLoading(t('loadingScanning'));
     
     try {
         // Upload et scan
         const formData = new FormData();
         formData.append('menu', file);
         
-        updateLoadingText('Extraction du texte...');
+        updateLoadingText(t('loadingExtracting'));
         const scanResponse = await fetch(`${API_URL}/scan`, {
             method: 'POST',
             body: formData
@@ -129,20 +147,43 @@ async function handleFile(file) {
         const scanData = await scanResponse.json();
         
         if (!scanData.plats || scanData.plats.length === 0) {
-            showToast('❌ Aucun plat détecté dans l\'image', 'error');
+            showToast(t('toastNoDishDetected'), 'error');
             hideLoading();
             return;
         }
         
-        // Analyser le premier plat détecté
-        const firstPlat = scanData.plats[0];
-        updateLoadingText('Génération de l\'alternative végétale...');
+        // Analyser TOUS les plats détectés
+        allAnalyses = [];
+        const platsToAnalyze = scanData.plats.slice(0, 5); // Limiter à 5 plats max
         
-        await analyzeMenu(firstPlat.nom, firstPlat.ingredients || []);
+        for (let i = 0; i < platsToAnalyze.length; i++) {
+            const plat = platsToAnalyze[i];
+            const analysisText = getCurrentLanguage() === 'fr' 
+                ? `Analyse ${i + 1}/${platsToAnalyze.length}: ${plat.nom}...`
+                : `Analysis ${i + 1}/${platsToAnalyze.length}: ${plat.nom}...`;
+            updateLoadingText(analysisText);
+            
+            try {
+                const analysis = await analyzeSingleMenu(plat.nom, plat.ingredients || []);
+                allAnalyses.push(analysis);
+            } catch (error) {
+                console.error(`Erreur analyse ${plat.nom}:`, error);
+            }
+        }
+        
+        if (allAnalyses.length === 0) {
+            showToast(t('toastNoAnalysisSuccess'), 'error');
+            hideLoading();
+            return;
+        }
+        
+        currentAnalysisIndex = 0;
+        hideLoading();
+        displayMultipleResults();
         
     } catch (error) {
         console.error('Erreur:', error);
-        showToast('❌ Erreur lors du traitement de l\'image', 'error');
+        showToast(t('toastScanError'), 'error');
         hideLoading();
     }
 }
@@ -152,7 +193,7 @@ async function handleManualAnalysis() {
     const plat = platInput.value.trim();
     
     if (!plat) {
-        showToast('❌ Veuillez entrer le nom d\'un plat', 'error');
+        showToast(t('toastEnterDish'), 'error');
         return;
     }
     
@@ -165,15 +206,19 @@ async function handleManualAnalysis() {
         }).filter(ing => ing.length > 0)
         : [];
     
-    showLoading('Analyse en cours...');
-    await analyzeMenu(plat, ingredients);
+    showLoading(t('loadingTitle'));
+    
+    const analysis = await analyzeSingleMenu(plat, ingredients);
+    allAnalyses = [analysis];
+    currentAnalysisIndex = 0;
+    
+    hideLoading();
+    displayMultipleResults();
 }
 
-// Analyse du menu via l'API
-async function analyzeMenu(plat, ingredients) {
+// Analyse d'un seul plat via l'API
+async function analyzeSingleMenu(plat, ingredients) {
     try {
-        updateLoadingText('Analyse nutritionnelle...');
-        
         const response = await fetch(`${API_URL}/analyze`, {
             method: 'POST',
             headers: {
@@ -190,29 +235,90 @@ async function analyzeMenu(plat, ingredients) {
         }
         
         const result = await response.json();
-        currentAnalysis = result.data;
-        
-        updateLoadingText('Calcul des impacts...');
-        
-        // Petit délai pour l'effet
-        setTimeout(() => {
-            hideLoading();
-            displayResults(currentAnalysis);
-        }, 500);
+        return result.data;
         
     } catch (error) {
         console.error('Erreur:', error);
-        showToast('❌ Erreur lors de l\'analyse', 'error');
-        hideLoading();
+        throw error;
     }
 }
 
-// Affichage des résultats
-function displayResults(data) {
+// Affichage des résultats multiples avec navigation
+function displayMultipleResults() {
+    if (allAnalyses.length === 0) return;
+    
+    // Créer la navigation si plusieurs plats
+    if (allAnalyses.length > 1) {
+        createDishNavigation();
+    }
+    
+    // Afficher le plat actuel
+    displaySingleResult(allAnalyses[currentAnalysisIndex]);
+    
+    // Afficher la section résultats
+    showResults();
+}
+
+// Créer la navigation entre plats
+function createDishNavigation() {
+    // Supprimer l'ancienne navigation si elle existe
+    const oldNav = document.getElementById('dishNavigation');
+    if (oldNav) oldNav.remove();
+    
+    const nav = document.createElement('div');
+    nav.id = 'dishNavigation';
+    nav.className = 'dish-navigation';
+    nav.innerHTML = `
+        <button id="prevDish" class="nav-btn" ${currentAnalysisIndex === 0 ? 'disabled' : ''}>
+            <i class="fas fa-chevron-left"></i> ${t('previous')}
+        </button>
+        <div class="dish-tabs">
+            ${allAnalyses.map((analysis, index) => `
+                <button class="dish-tab ${index === currentAnalysisIndex ? 'active' : ''}" 
+                        data-index="${index}">
+                    <span class="dish-tab-number">${index + 1}</span>
+                    <span class="dish-tab-name">${analysis.plat_original}</span>
+                </button>
+            `).join('')}
+        </div>
+        <button id="nextDish" class="nav-btn" ${currentAnalysisIndex === allAnalyses.length - 1 ? 'disabled' : ''}>
+            ${t('next')} <i class="fas fa-chevron-right"></i>
+        </button>
+    `;
+    
+    // Insérer la navigation APRÈS le header (en dessous du bouton "Nouvelle Analyse")
+    const resultsHeader = document.querySelector('.results-header');
+    resultsHeader.insertAdjacentElement('afterend', nav);
+    
+    // Event listeners
+    document.getElementById('prevDish').addEventListener('click', () => navigateToDish(currentAnalysisIndex - 1));
+    document.getElementById('nextDish').addEventListener('click', () => navigateToDish(currentAnalysisIndex + 1));
+    
+    document.querySelectorAll('.dish-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            const index = parseInt(e.currentTarget.dataset.index);
+            navigateToDish(index);
+        });
+    });
+}
+
+// Naviguer vers un plat spécifique
+function navigateToDish(index) {
+    if (index < 0 || index >= allAnalyses.length) return;
+    
+    currentAnalysisIndex = index;
+    displayMultipleResults();
+    
+    // Scroll vers le haut
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Affichage d'un seul résultat
+function displaySingleResult(data) {
     // Plat original
     document.getElementById('originalDish').innerHTML = `
         <div class="dish-name">${data.plat_original}</div>
-        <h4>Ingrédients:</h4>
+        <h4>${t('ingredientsColon')}</h4>
         <ul class="ingredients-list">
             ${data.ingredients_originaux.map(ing => `
                 <li>
@@ -226,7 +332,7 @@ function displayResults(data) {
     // Alternative végétale
     document.getElementById('veganAlternative').innerHTML = `
         <div class="dish-name">${data.alternative_vegetale.nom}</div>
-        <h4>Ingrédients:</h4>
+        <h4>${t('ingredientsColon')}</h4>
         <ul class="ingredients-list">
             ${data.alternative_vegetale.ingredients.map(ing => `
                 <li>
@@ -236,10 +342,10 @@ function displayResults(data) {
             `).join('')}
         </ul>
         <div class="preparation">
-            <h4><i class="fas fa-book"></i> Préparation:</h4>
+            <h4><i class="fas fa-book"></i> ${t('preparationColon')}</h4>
             <p>${data.alternative_vegetale.preparation}</p>
             ${data.alternative_vegetale.temps_preparation ? `
-                <p><strong>⏱️ Temps:</strong> ${data.alternative_vegetale.temps_preparation}</p>
+                <p><strong>⏱️ ${t('timeColon')}</strong> ${data.alternative_vegetale.temps_preparation}</p>
             ` : ''}
         </div>
     `;
@@ -284,12 +390,12 @@ function displaySuppliers(suppliers) {
                 <h4 class="supplier-name">
                     <i class="fas fa-store"></i> ${supplier.nom}
                 </h4>
-                <span class="supplier-type ${supplier.type}">${supplier.type}</span>
+                <span class="supplier-type ${supplier.type}">${t(supplier.type)}</span>
             </div>
             
             <div class="supplier-body">
                 <div class="supplier-section">
-                    <h5><i class="fas fa-box"></i> Spécialités</h5>
+                    <h5><i class="fas fa-box"></i> ${t('specialties')}</h5>
                     <div class="supplier-tags">
                         ${supplier.specialites.slice(0, 3).map(spec => 
                             `<span class="tag">${spec}</span>`
@@ -298,7 +404,7 @@ function displaySuppliers(suppliers) {
                 </div>
                 
                 <div class="supplier-section">
-                    <h5><i class="fas fa-tags"></i> Marques disponibles</h5>
+                    <h5><i class="fas fa-tags"></i> ${t('brandsAvailable')}</h5>
                     <div class="supplier-tags">
                         ${supplier.marques_disponibles.slice(0, 4).map(marque => 
                             `<span class="tag brand">${marque}</span>`
@@ -307,14 +413,14 @@ function displaySuppliers(suppliers) {
                 </div>
                 
                 <div class="supplier-section">
-                    <h5><i class="fas fa-info-circle"></i> Pourquoi ce fournisseur ?</h5>
+                    <h5><i class="fas fa-info-circle"></i> ${t('whySupplier')}</h5>
                     <p class="supplier-relevance">${supplier.pertinence}</p>
                 </div>
                 
                 <div class="supplier-info">
                     <div class="info-row">
                         <i class="fas fa-truck"></i>
-                        <span>Livraison: ${supplier.livraison.delai_moyen}</span>
+                        <span>${t('delivery')}: ${supplier.livraison.delai_moyen}</span>
                     </div>
                     <div class="info-row">
                         <i class="fas fa-map-marker-alt"></i>
@@ -322,11 +428,11 @@ function displaySuppliers(suppliers) {
                     </div>
                     <div class="info-row">
                         <i class="fas fa-shopping-cart"></i>
-                        <span>Min: ${supplier.livraison.commande_minimum || 'Sur devis'}</span>
+                        <span>${t('minOrder')}: ${supplier.livraison.commande_minimum || t('onQuote')}</span>
                     </div>
                     <div class="info-row">
                         <i class="fas fa-euro-sign"></i>
-                        <span class="price-${supplier.prix_indicatif}">${supplier.prix_indicatif}</span>
+                        <span class="price-${supplier.prix_indicatif}">${t(supplier.prix_indicatif)}</span>
                     </div>
                 </div>
             </div>
@@ -334,7 +440,7 @@ function displaySuppliers(suppliers) {
             <div class="supplier-footer">
                 ${supplier.contact.site_web ? `
                     <a href="${supplier.contact.site_web}" target="_blank" class="supplier-link">
-                        <i class="fas fa-globe"></i> Site web
+                        <i class="fas fa-globe"></i> ${t('website')}
                     </a>
                 ` : ''}
                 ${supplier.contact.telephone ? `
@@ -344,7 +450,7 @@ function displaySuppliers(suppliers) {
                 ` : ''}
                 ${supplier.contact.email ? `
                     <a href="mailto:${supplier.contact.email}" class="supplier-link">
-                        <i class="fas fa-envelope"></i> Email
+                        <i class="fas fa-envelope"></i> ${t('email')}
                     </a>
                 ` : ''}
             </div>
@@ -358,22 +464,22 @@ function displayNutritionComparison(nutrition) {
     
     container.innerHTML = `
         <div class="comparison-item">
-            <h4>Protéines</h4>
+            <h4>${t('proteinsShort')}</h4>
             <div class="comparison-value">${nutrition.vegetale.proteines}<span class="comparison-unit">g</span></div>
-            <small>vs ${nutrition.original.proteines}g</small>
+            <small>${t('vs')} ${nutrition.original.proteines}g</small>
         </div>
         <div class="comparison-item">
-            <h4>Calories</h4>
+            <h4>${t('caloriesShort')}</h4>
             <div class="comparison-value">${nutrition.vegetale.calories}<span class="comparison-unit">kcal</span></div>
-            <small>vs ${nutrition.original.calories}kcal</small>
+            <small>${t('vs')} ${nutrition.original.calories}kcal</small>
         </div>
         <div class="comparison-item">
-            <h4>Fibres</h4>
+            <h4>${t('fiberShort')}</h4>
             <div class="comparison-value">${nutrition.vegetale.fibres}<span class="comparison-unit">g</span></div>
-            <small>vs ${nutrition.original.fibres}g</small>
+            <small>${t('vs')} ${nutrition.original.fibres}g</small>
         </div>
         <div class="comparison-item">
-            <h4>Équivalence</h4>
+            <h4>${t('equivalenceShort')}</h4>
             <div class="comparison-value">${nutrition.equivalence_pourcent}<span class="comparison-unit">%</span></div>
         </div>
     `;
@@ -386,20 +492,25 @@ function displayNutritionComparison(nutrition) {
 function createNutritionChart(nutrition) {
     const ctx = document.getElementById('nutritionChart');
     
-    new Chart(ctx, {
+    // Détruire le graphique existant s'il existe
+    if (nutritionChartInstance) {
+        nutritionChartInstance.destroy();
+    }
+    
+    nutritionChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Protéines (g)', 'Calories (kcal)', 'Fibres (g)'],
+            labels: [t('proteinsG'), t('caloriesKcal'), t('fiberG')],
             datasets: [
                 {
-                    label: 'Original',
+                    label: t('original'),
                     data: [nutrition.original.proteines, nutrition.original.calories / 10, nutrition.original.fibres],
                     backgroundColor: 'rgba(239, 68, 68, 0.5)',
                     borderColor: 'rgba(239, 68, 68, 1)',
                     borderWidth: 2
                 },
                 {
-                    label: 'Végétal',
+                    label: t('plantBased'),
                     data: [nutrition.vegetale.proteines, nutrition.vegetale.calories / 10, nutrition.vegetale.fibres],
                     backgroundColor: 'rgba(16, 185, 129, 0.5)',
                     borderColor: 'rgba(16, 185, 129, 1)',
@@ -430,15 +541,15 @@ function displayEnvironmentalImpact(impact) {
     
     container.innerHTML = `
         <div class="impact-item">
-            <div class="impact-label">CO2 Original</div>
+            <div class="impact-label">${t('co2OriginalLabel')}</div>
             <div class="impact-value negative">${impact.co2_original_kg.toFixed(2)} kg</div>
         </div>
         <div class="impact-item">
-            <div class="impact-label">CO2 Végétal</div>
+            <div class="impact-label">${t('co2PlantLabel')}</div>
             <div class="impact-value positive">${impact.co2_vegetale_kg.toFixed(2)} kg</div>
         </div>
         <div class="impact-item">
-            <div class="impact-label">Gain CO2</div>
+            <div class="impact-label">${t('co2GainLabel')}</div>
             <div class="impact-value positive">-${impact.gain_co2_kg.toFixed(2)} kg</div>
             <div class="impact-percentage">(-${impact.gain_co2_pourcent}%)</div>
         </div>
@@ -455,10 +566,15 @@ function displayEnvironmentalImpact(impact) {
 function createCO2Chart(impact) {
     const ctx = document.getElementById('co2Chart');
     
-    new Chart(ctx, {
+    // Détruire le graphique existant s'il existe
+    if (co2ChartInstance) {
+        co2ChartInstance.destroy();
+    }
+    
+    co2ChartInstance = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Original', 'Végétal', 'Économisé'],
+            labels: [t('original'), t('plantBased'), t('saved')],
             datasets: [{
                 data: [
                     impact.co2_vegetale_kg,
@@ -488,17 +604,25 @@ function createCO2Chart(impact) {
 function displayEconomicImpact(impact) {
     const container = document.getElementById('economicImpact');
     
+    // Debug: afficher les données reçues
+    console.log('💰 Impact économique:', {
+        cout_original: impact.cout_original_euros,
+        cout_vegetale: impact.cout_vegetale_euros,
+        economie: impact.economie_euros,
+        economie_pourcent: impact.economie_pourcent
+    });
+    
     container.innerHTML = `
         <div class="impact-item">
-            <div class="impact-label">Coût Original</div>
+            <div class="impact-label">${t('costOriginalLabel')}</div>
             <div class="impact-value negative">${impact.cout_original_euros.toFixed(2)} €</div>
         </div>
         <div class="impact-item">
-            <div class="impact-label">Coût Végétal</div>
+            <div class="impact-label">${t('costPlantLabel')}</div>
             <div class="impact-value positive">${impact.cout_vegetale_euros.toFixed(2)} €</div>
         </div>
         <div class="impact-item">
-            <div class="impact-label">Économie</div>
+            <div class="impact-label">${t('savingsLabel')}</div>
             <div class="impact-value positive">-${impact.economie_euros.toFixed(2)} €</div>
             <div class="impact-percentage">(-${impact.economie_pourcent}%)</div>
         </div>
@@ -515,12 +639,17 @@ function displayEconomicImpact(impact) {
 function createCostChart(impact) {
     const ctx = document.getElementById('costChart');
     
-    new Chart(ctx, {
+    // Détruire le graphique existant s'il existe
+    if (costChartInstance) {
+        costChartInstance.destroy();
+    }
+    
+    costChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Coût Original', 'Coût Végétal', 'Économie'],
+            labels: [t('originalCost'), t('plantBasedCost'), t('economy')],
             datasets: [{
-                label: 'Euros (€)',
+                label: t('eurosLabel'),
                 data: [
                     impact.cout_original_euros,
                     impact.cout_vegetale_euros,
@@ -563,7 +692,7 @@ function displayGlobalScore(score) {
         <div class="score-circle" style="--score: ${score}">
             <div class="score-number">${score}</div>
         </div>
-        <div class="score-label">Score de qualité de l'alternative</div>
+        <div class="score-label">${t('scoreQualityLabel')}</div>
     `;
 }
 
@@ -572,7 +701,7 @@ function displayRecommendations(recommendations) {
     const container = document.getElementById('recommendations');
     
     if (recommendations.length === 0) {
-        container.innerHTML = '<li>Aucune recommandation spécifique</li>';
+        container.innerHTML = `<li>${t('noRecommendations')}</li>`;
         return;
     }
     
@@ -581,42 +710,46 @@ function displayRecommendations(recommendations) {
 
 // Téléchargement du rapport
 function downloadReport() {
-    if (!currentAnalysis) return;
+    if (allAnalyses.length === 0) return;
+    
+    const currentData = allAnalyses[currentAnalysisIndex];
     
     const report = {
         date: new Date().toISOString(),
-        plat_original: currentAnalysis.plat_original,
-        alternative_vegetale: currentAnalysis.alternative_vegetale,
-        nutrition: currentAnalysis.nutrition,
-        impact_environnemental: currentAnalysis.impact_environnemental,
-        impact_economique: currentAnalysis.impact_economique,
-        score_global: currentAnalysis.score_global,
-        recommandations: currentAnalysis.recommandations
+        plat_original: currentData.plat_original,
+        alternative_vegetale: currentData.alternative_vegetale,
+        nutrition: currentData.nutrition,
+        impact_environnemental: currentData.impact_environnemental,
+        impact_economique: currentData.impact_economique,
+        score_global: currentData.score_global,
+        recommandations: currentData.recommandations
     };
     
     const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `hack-the-fork-${currentAnalysis.plat_original.replace(/\s+/g, '-')}.json`;
+    a.download = `hack-the-fork-${currentData.plat_original.replace(/\s+/g, '-')}.json`;
     a.click();
     URL.revokeObjectURL(url);
     
-    showToast('✅ Rapport téléchargé', 'success');
+    showToast(t('toastReportDownloaded'), 'success');
 }
 
 // Partage des résultats
 function shareResults() {
-    if (!currentAnalysis) return;
+    if (allAnalyses.length === 0) return;
     
-    const text = `🌱 Hack the Fork\n\n${currentAnalysis.plat_original} → ${currentAnalysis.alternative_vegetale.nom}\n\n💚 -${currentAnalysis.impact_environnemental.gain_co2_kg.toFixed(1)}kg CO2\n💰 -${currentAnalysis.impact_economique.economie_euros.toFixed(2)}€\n\nScore: ${currentAnalysis.score_global}/100`;
+    const currentData = allAnalyses[currentAnalysisIndex];
+    
+    const text = `🌱 Hack the Fork\n\n${currentData.plat_original} → ${currentData.alternative_vegetale.nom}\n\n💚 -${currentData.impact_environnemental.gain_co2_kg.toFixed(1)}kg CO2\n💰 -${currentData.impact_economique.economie_euros.toFixed(2)}€\n\nScore: ${currentData.score_global}/100`;
     
     if (navigator.share) {
         navigator.share({
             title: 'Hack the Fork',
             text: text
         }).then(() => {
-            showToast('✅ Partagé avec succès', 'success');
+            showToast(t('toastSharedSuccess'), 'success');
         }).catch(() => {
             copyToClipboard(text);
         });
@@ -628,9 +761,9 @@ function shareResults() {
 // Copier dans le presse-papier
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
-        showToast('✅ Copié dans le presse-papier', 'success');
+        showToast(t('toastCopied'), 'success');
     }).catch(() => {
-        showToast('❌ Erreur lors de la copie', 'error');
+        showToast(t('toastCopyError'), 'error');
     });
 }
 
@@ -664,7 +797,27 @@ function resetApp() {
     platInput.value = '';
     ingredientsInput.value = '';
     fileInput.value = '';
-    currentAnalysis = null;
+    allAnalyses = [];
+    currentAnalysisIndex = 0;
+    
+    // Détruire les graphiques
+    if (nutritionChartInstance) {
+        nutritionChartInstance.destroy();
+        nutritionChartInstance = null;
+    }
+    if (co2ChartInstance) {
+        co2ChartInstance.destroy();
+        co2ChartInstance = null;
+    }
+    if (costChartInstance) {
+        costChartInstance.destroy();
+        costChartInstance = null;
+    }
+    
+    // Supprimer la navigation
+    const nav = document.getElementById('dishNavigation');
+    if (nav) nav.remove();
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 

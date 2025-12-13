@@ -16,43 +16,55 @@ export class BlackboxService {
   }
 
   /**
-   * Appel générique à l'API Blackbox
+   * Appel générique à l'API Blackbox avec retry
    */
-  private async callBlackboxAPI(prompt: string, temperature: number = 0.7): Promise<string> {
-    try {
-      const request: BlackboxRequest = {
-        messages: [
+  private async callBlackboxAPI(prompt: string, temperature: number = 0.7, retries: number = 1): Promise<string> {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const request: BlackboxRequest = {
+          messages: [
+            {
+              role: 'system',
+              content: 'Expert nutrition et cuisine végétale. JSON uniquement.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          model: 'blackboxai/meta-llama/llama-3.3-70b-instruct:free',
+          temperature,
+          max_tokens: 2500 // Réduit pour réponse plus rapide
+        };
+
+        console.log(`🔄 Tentative ${attempt}/${retries}...`);
+
+        const response = await axios.post<BlackboxResponse>(
+          this.apiUrl,
+          request,
           {
-            role: 'system',
-            content: 'Tu es un assistant expert en nutrition, impact environnemental et cuisine végétale. Tu réponds toujours avec des JSON valides et structurés.'
-          },
-          {
-            role: 'user',
-            content: prompt
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.apiKey}`
+            },
+            timeout: 45000 // Réduit à 45 secondes pour basculer plus vite vers démo
           }
-        ],
-        model: 'blackboxai/meta-llama/llama-3.3-70b-instruct:free',
-        temperature,
-        max_tokens: 3000
-      };
+        );
 
-      const response = await axios.post<BlackboxResponse>(
-        this.apiUrl,
-        request,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.apiKey}`
-          },
-          timeout: 60000 // Augmenté à 60 secondes
+        return response.data.choices[0].message.content;
+      } catch (error: any) {
+        console.error(`❌ Tentative ${attempt} échouée:`, error.message);
+        
+        if (attempt === retries) {
+          throw new Error(`Erreur API Blackbox: ${error.message}`);
         }
-      );
-
-      return response.data.choices[0].message.content;
-    } catch (error: any) {
-      console.error('❌ Erreur API Blackbox:', error.response?.data || error.message);
-      throw new Error(`Erreur API Blackbox: ${error.message}`);
+        
+        // Attendre 2 secondes avant de réessayer
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
     }
+    
+    throw new Error('Toutes les tentatives ont échoué');
   }
 
   /**
