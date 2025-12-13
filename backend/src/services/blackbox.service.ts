@@ -1,0 +1,200 @@
+import axios from 'axios';
+import { BlackboxRequest, BlackboxResponse, AnalysisResult, Ingredient } from '../types';
+import { PromptService } from './prompt.service';
+
+export class BlackboxService {
+  private apiKey: string;
+  private apiUrl: string;
+
+  constructor() {
+    this.apiKey = process.env.BLACKBOX_API_KEY || '';
+    this.apiUrl = process.env.BLACKBOX_API_URL || 'https://api.blackbox.ai/v1/chat/completions';
+
+    if (!this.apiKey) {
+      console.warn('⚠️  BLACKBOX_API_KEY non configurée. Utilisation du mode démo.');
+    }
+  }
+
+  /**
+   * Appel générique à l'API Blackbox
+   */
+  private async callBlackboxAPI(prompt: string, temperature: number = 0.7): Promise<string> {
+    try {
+      const request: BlackboxRequest = {
+        messages: [
+          {
+            role: 'system',
+            content: 'Tu es un assistant expert en nutrition, impact environnemental et cuisine végétale. Tu réponds toujours avec des JSON valides et structurés.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        model: 'gpt-4o',
+        temperature,
+        max_tokens: 2000
+      };
+
+      const response = await axios.post<BlackboxResponse>(
+        this.apiUrl,
+        request,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.apiKey}`
+          },
+          timeout: 30000
+        }
+      );
+
+      return response.data.choices[0].message.content;
+    } catch (error: any) {
+      console.error('❌ Erreur API Blackbox:', error.response?.data || error.message);
+      throw new Error(`Erreur API Blackbox: ${error.message}`);
+    }
+  }
+
+  /**
+   * Analyse complète d'un plat avec génération d'alternative végétale
+   */
+  async analyzeMenu(plat: string, ingredients: Ingredient[]): Promise<AnalysisResult> {
+    try {
+      console.log(`🔍 Analyse du plat: ${plat}`);
+
+      const prompt = PromptService.buildCompleteAnalysisPrompt(plat, ingredients);
+      const response = await this.callBlackboxAPI(prompt, 0.7);
+
+      // Parser la réponse JSON
+      const result = this.parseJSONResponse(response);
+
+      // Ajouter les informations du plat original
+      result.plat_original = plat;
+      result.ingredients_originaux = ingredients;
+
+      console.log('✅ Analyse terminée avec succès');
+      return result as AnalysisResult;
+    } catch (error: any) {
+      console.error('❌ Erreur lors de l\'analyse:', error.message);
+      
+      // Retourner un résultat de démo en cas d'erreur
+      return this.getDemoResult(plat, ingredients);
+    }
+  }
+
+  /**
+   * Extrait les plats d'un texte OCR
+   */
+  async extractMenuFromOCR(ocrText: string): Promise<any> {
+    try {
+      console.log('📄 Extraction des plats du menu...');
+
+      const prompt = PromptService.buildMenuExtractionPrompt(ocrText);
+      const response = await this.callBlackboxAPI(prompt, 0.5);
+
+      const result = this.parseJSONResponse(response);
+      console.log(`✅ ${result.plats?.length || 0} plats extraits`);
+
+      return result;
+    } catch (error: any) {
+      console.error('❌ Erreur lors de l\'extraction:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Parse une réponse JSON de l'API (gère les cas où le JSON est entouré de texte)
+   */
+  private parseJSONResponse(response: string): any {
+    try {
+      // Essayer de parser directement
+      return JSON.parse(response);
+    } catch (e) {
+      // Si échec, chercher le JSON dans la réponse
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      throw new Error('Impossible de parser la réponse JSON');
+    }
+  }
+
+  /**
+   * Résultat de démo pour les tests sans API
+   */
+  private getDemoResult(plat: string, ingredients: Ingredient[]): AnalysisResult {
+    console.log('🎭 Mode démo activé - Génération de données fictives');
+
+    return {
+      plat_original: plat,
+      ingredients_originaux: ingredients,
+      alternative_vegetale: {
+        nom: `${plat} Végétal`,
+        ingredients: [
+          { nom: 'Seitan', quantite: '200', unite: 'g' },
+          { nom: 'Légumes de saison', quantite: '150', unite: 'g' },
+          { nom: 'Sauce maison', quantite: '50', unite: 'ml' }
+        ],
+        preparation: 'Faire revenir le seitan avec les légumes, ajouter la sauce et laisser mijoter 15 minutes.',
+        temps_preparation: '30 min'
+      },
+      nutrition: {
+        original: {
+          proteines: 25,
+          calories: 350,
+          fibres: 2,
+          lipides: 15,
+          glucides: 30
+        },
+        vegetale: {
+          proteines: 24,
+          calories: 320,
+          fibres: 8,
+          lipides: 10,
+          glucides: 35
+        },
+        equivalence_pourcent: 92,
+        explication: 'Profil nutritionnel très similaire avec plus de fibres et moins de lipides saturés.'
+      },
+      impact_environnemental: {
+        co2_original_kg: 5.4,
+        co2_vegetale_kg: 0.9,
+        gain_co2_kg: 4.5,
+        gain_co2_pourcent: 83,
+        explication: 'Réduction majeure des émissions grâce au remplacement des protéines animales par des protéines végétales.'
+      },
+      impact_economique: {
+        cout_original_euros: 12.50,
+        cout_vegetale_euros: 8.20,
+        economie_euros: 4.30,
+        economie_pourcent: 34,
+        explication: 'Les protéines végétales sont significativement moins coûteuses que la viande.'
+      },
+      score_global: 90,
+      recommandations: [
+        'Mettre en avant l\'impact environnemental sur le menu',
+        'Proposer une dégustation pour convaincre les clients sceptiques',
+        'Former le personnel sur les bénéfices nutritionnels et environnementaux'
+      ]
+    };
+  }
+
+  /**
+   * Vérifie si l'API est configurée
+   */
+  isConfigured(): boolean {
+    return !!this.apiKey && this.apiKey !== '';
+  }
+
+  /**
+   * Test de connexion à l'API
+   */
+  async testConnection(): Promise<boolean> {
+    try {
+      const response = await this.callBlackboxAPI('Réponds simplement "OK"', 0.1);
+      return response.toLowerCase().includes('ok');
+    } catch (error) {
+      return false;
+    }
+  }
+}

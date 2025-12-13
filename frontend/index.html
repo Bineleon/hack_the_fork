@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hack the Fork - Alternative Végétale</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-leaf"></i>
+                <h1>Hack the Fork</h1>
+            </div>
+            <p class="tagline">Transformez votre menu en végétal 🌱</p>
+        </header>
+
+        <!-- Section Upload -->
+        <section class="upload-section" id="uploadSection">
+            <div class="upload-card">
+                <h2><i class="fas fa-camera"></i> Scanner un menu</h2>
+                <p class="subtitle">Uploadez une photo de votre menu pour l'analyser</p>
+                
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="fileInput" accept="image/*" hidden>
+                    <div class="upload-content">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Cliquez ou glissez une image ici</p>
+                        <span class="file-types">JPG, PNG, WEBP (max 10MB)</span>
+                    </div>
+                </div>
+
+                <div class="divider">
+                    <span>OU</span>
+                </div>
+
+                <div class="manual-input">
+                    <h3><i class="fas fa-keyboard"></i> Saisie manuelle</h3>
+                    <input type="text" id="platInput" placeholder="Ex: Boeuf Bourguignon" class="input-field">
+                    <textarea id="ingredientsInput" placeholder="Ingrédients (optionnel)&#10;Ex: Boeuf 300g, Carottes 200g, Vin rouge 200ml" class="textarea-field"></textarea>
+                    <button id="analyzeBtn" class="btn btn-primary">
+                        <i class="fas fa-magic"></i> Analyser
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Loading -->
+        <section class="loading-section hidden" id="loadingSection">
+            <div class="loading-card">
+                <div class="spinner"></div>
+                <h3>Analyse en cours...</h3>
+                <p id="loadingText">Extraction des ingrédients</p>
+            </div>
+        </section>
+
+        <!-- Section Résultats -->
+        <section class="results-section hidden" id="resultsSection">
+            <div class="results-header">
+                <h2><i class="fas fa-check-circle"></i> Résultats de l'analyse</h2>
+                <button id="newAnalysisBtn" class="btn btn-secondary">
+                    <i class="fas fa-redo"></i> Nouvelle analyse
+                </button>
+            </div>
+
+            <!-- Plat Original -->
+            <div class="result-card">
+                <h3 class="card-title">
+                    <i class="fas fa-utensils"></i> Plat Original
+                </h3>
+                <div id="originalDish" class="dish-info"></div>
+            </div>
+
+            <!-- Alternative Végétale -->
+            <div class="result-card highlight">
+                <h3 class="card-title">
+                    <i class="fas fa-seedling"></i> Alternative Végétale
+                </h3>
+                <div id="veganAlternative" class="dish-info"></div>
+            </div>
+
+            <!-- Comparaison Nutritionnelle -->
+            <div class="result-card">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-bar"></i> Comparaison Nutritionnelle
+                </h3>
+                <div id="nutritionComparison" class="comparison-grid"></div>
+                <canvas id="nutritionChart" class="chart"></canvas>
+            </div>
+
+            <!-- Impact Environnemental -->
+            <div class="result-card impact-card">
+                <h3 class="card-title">
+                    <i class="fas fa-leaf"></i> Impact Environnemental
+                </h3>
+                <div id="environmentalImpact" class="impact-grid"></div>
+                <canvas id="co2Chart" class="chart"></canvas>
+            </div>
+
+            <!-- Impact Économique -->
+            <div class="result-card impact-card">
+                <h3 class="card-title">
+                    <i class="fas fa-euro-sign"></i> Impact Économique
+                </h3>
+                <div id="economicImpact" class="impact-grid"></div>
+                <canvas id="costChart" class="chart"></canvas>
+            </div>
+
+            <!-- Score Global -->
+            <div class="result-card score-card">
+                <h3 class="card-title">
+                    <i class="fas fa-star"></i> Score Global
+                </h3>
+                <div id="globalScore" class="score-display"></div>
+            </div>
+
+            <!-- Recommandations -->
+            <div class="result-card">
+                <h3 class="card-title">
+                    <i class="fas fa-lightbulb"></i> Recommandations
+                </h3>
+                <ul id="recommendations" class="recommendations-list"></ul>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions">
+                <button id="downloadBtn" class="btn btn-primary">
+                    <i class="fas fa-download"></i> Télécharger le rapport
+                </button>
+                <button id="shareBtn" class="btn btn-secondary">
+                    <i class="fas fa-share-alt"></i> Partager
+                </button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Hack the Fork © 2024 - Hackathon MVP</p>
+            <p class="footer-links">
+                <a href="#"><i class="fas fa-info-circle"></i> À propos</a>
+                <a href="#"><i class="fas fa-code"></i> API</a>
+                <a href="#"><i class="fab fa-github"></i> GitHub</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
