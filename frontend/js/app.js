@@ -256,11 +256,100 @@ function displayResults(data) {
     // Score global
     displayGlobalScore(data.score_global);
     
+    // Fournisseurs recommandés
+    displaySuppliers(data.fournisseurs_recommandes || []);
+    
     // Recommandations
     displayRecommendations(data.recommandations || []);
     
     // Afficher la section résultats
     showResults();
+}
+
+// Affichage des fournisseurs
+function displaySuppliers(suppliers) {
+    const container = document.getElementById('suppliers');
+    const card = document.getElementById('suppliersCard');
+    
+    if (!suppliers || suppliers.length === 0) {
+        card.style.display = 'none';
+        return;
+    }
+    
+    card.style.display = 'block';
+    
+    container.innerHTML = suppliers.map(supplier => `
+        <div class="supplier-card">
+            <div class="supplier-header">
+                <h4 class="supplier-name">
+                    <i class="fas fa-store"></i> ${supplier.nom}
+                </h4>
+                <span class="supplier-type ${supplier.type}">${supplier.type}</span>
+            </div>
+            
+            <div class="supplier-body">
+                <div class="supplier-section">
+                    <h5><i class="fas fa-box"></i> Spécialités</h5>
+                    <div class="supplier-tags">
+                        ${supplier.specialites.slice(0, 3).map(spec => 
+                            `<span class="tag">${spec}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+                
+                <div class="supplier-section">
+                    <h5><i class="fas fa-tags"></i> Marques disponibles</h5>
+                    <div class="supplier-tags">
+                        ${supplier.marques_disponibles.slice(0, 4).map(marque => 
+                            `<span class="tag brand">${marque}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+                
+                <div class="supplier-section">
+                    <h5><i class="fas fa-info-circle"></i> Pourquoi ce fournisseur ?</h5>
+                    <p class="supplier-relevance">${supplier.pertinence}</p>
+                </div>
+                
+                <div class="supplier-info">
+                    <div class="info-row">
+                        <i class="fas fa-truck"></i>
+                        <span>Livraison: ${supplier.livraison.delai_moyen}</span>
+                    </div>
+                    <div class="info-row">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>${supplier.livraison.zones.join(', ')}</span>
+                    </div>
+                    <div class="info-row">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Min: ${supplier.livraison.commande_minimum || 'Sur devis'}</span>
+                    </div>
+                    <div class="info-row">
+                        <i class="fas fa-euro-sign"></i>
+                        <span class="price-${supplier.prix_indicatif}">${supplier.prix_indicatif}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="supplier-footer">
+                ${supplier.contact.site_web ? `
+                    <a href="${supplier.contact.site_web}" target="_blank" class="supplier-link">
+                        <i class="fas fa-globe"></i> Site web
+                    </a>
+                ` : ''}
+                ${supplier.contact.telephone ? `
+                    <a href="tel:${supplier.contact.telephone}" class="supplier-link">
+                        <i class="fas fa-phone"></i> ${supplier.contact.telephone}
+                    </a>
+                ` : ''}
+                ${supplier.contact.email ? `
+                    <a href="mailto:${supplier.contact.email}" class="supplier-link">
+                        <i class="fas fa-envelope"></i> Email
+                    </a>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
 }
 
 // Affichage de la comparaison nutritionnelle

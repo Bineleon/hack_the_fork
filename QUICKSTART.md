@@ -9,21 +9,45 @@ cd hack-the-fork
 ```
 
 ### Étape 2 : Installer les dépendances Backend
+
+**Linux/macOS (bash/zsh) :**
 ```bash
 cd backend
 npm install
 ```
 
+**Windows (PowerShell) :**
+```powershell
+cd backend
+npm install
+```
+
 ### Étape 3 : Configuration (Optionnel)
+
+**Linux/macOS :**
 ```bash
 # Copier le fichier d'exemple
 cp .env.example .env
 
 # Éditer .env et ajouter votre clé API Blackbox (optionnel)
-# Sans clé API, l'app fonctionne en mode démo
+nano .env
+# OU
+vim .env
 ```
 
+**Windows :**
+```powershell
+# Copier le fichier d'exemple
+Copy-Item .env.example .env
+
+# Éditer .env
+notepad .env
+```
+
+> **Note :** Sans clé API, l'app fonctionne en mode démo
+
 ### Étape 4 : Démarrer le Backend
+
 ```bash
 npm run dev
 ```
@@ -38,8 +62,18 @@ npm run dev
 ```
 
 **Option B - Serveur local (Recommandé)**
+
+**Linux/macOS :**
 ```bash
 # Dans un nouveau terminal
+cd frontend
+python3 -m http.server 5500
+# OU
+npx http-server . -p 5500
+```
+
+**Windows :**
+```powershell
 cd frontend
 python -m http.server 5500
 # OU
@@ -80,8 +114,18 @@ npx http-server . -p 5500
 ## 🔧 Résolution de Problèmes
 
 ### ❌ "Cannot find module 'express'"
+
+**Linux/macOS :**
 ```bash
 cd backend
+rm -rf node_modules package-lock.json
+npm install
+```
+
+**Windows :**
+```powershell
+cd backend
+Remove-Item -Recurse -Force node_modules, package-lock.json
 npm install
 ```
 
@@ -96,11 +140,19 @@ npm run dev
 ```
 
 ### ❌ "CORS Error"
+
+**Linux/macOS :**
 ```bash
 # Vérifier le fichier backend/.env
-# CORS_ORIGIN=*
-# OU
-# CORS_ORIGIN=http://localhost:5500
+nano backend/.env
+# Ajouter: CORS_ORIGIN=*
+```
+
+**Windows :**
+```powershell
+# Vérifier le fichier backend/.env
+notepad backend\.env
+# Ajouter: CORS_ORIGIN=*
 ```
 
 ### ⚠️ Mode Démo (Sans API Blackbox)
@@ -117,12 +169,19 @@ Pour obtenir une clé API :
 ## 📊 Vérification de l'Installation
 
 ### Backend
+
+**Linux/macOS :**
 ```bash
 # Test de santé
 curl http://localhost:3000/api/menu/health
 
 # Devrait retourner :
 # {"status":"ok","services":{"ocr":"ready","blackbox":"..."},...}
+```
+
+**Windows (PowerShell) :**
+```powershell
+Invoke-RestMethod -Uri "http://localhost:3000/api/menu/health" -Method Get | ConvertTo-Json
 ```
 
 ### Frontend
@@ -136,9 +195,19 @@ Ouvrir `http://localhost:5500` dans le navigateur
 ## 🎨 Personnalisation Rapide
 
 ### Changer le Port Backend
+
+**Linux/macOS :**
 ```bash
-# backend/.env
-PORT=4000
+# Éditer backend/.env
+nano backend/.env
+# Changer: PORT=4000
+```
+
+**Windows :**
+```powershell
+# Éditer backend/.env
+notepad backend\.env
+# Changer: PORT=4000
 ```
 
 ### Changer l'URL de l'API dans le Frontend
@@ -171,6 +240,26 @@ npm run build
 
 # Démarrer en production
 npm start
+```
+
+### Scripts d'Installation et de Test
+
+**Linux/macOS :**
+```bash
+# Installation automatique
+./install.sh
+
+# Tests API
+./test-api.sh
+```
+
+**Windows :**
+```powershell
+# Installation automatique
+.\install.ps1
+
+# Tests API
+.\test-api.ps1
 ```
 
 ### Logs

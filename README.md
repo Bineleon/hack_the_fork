@@ -46,15 +46,43 @@ hack_the_fork/
 
 ### 1. Installation Backend
 
+**Linux/macOS :**
 ```bash
+cd backend
+npm install
+```
+
+**Windows :**
+```powershell
 cd backend
 npm install
 ```
 
 ### 2. Configuration
 
-Créer un fichier `.env` dans le dossier `backend/` :
+**Linux/macOS :**
+```bash
+# Créer le fichier .env dans backend/
+cd backend
+cp .env.example .env
 
+# Éditer avec votre éditeur préféré
+nano .env
+# OU
+vim .env
+```
+
+**Windows :**
+```powershell
+# Créer le fichier .env dans backend/
+cd backend
+Copy-Item .env.example .env
+
+# Éditer
+notepad .env
+```
+
+Contenu du fichier `.env` :
 ```env
 PORT=3000
 NODE_ENV=development
@@ -78,18 +106,32 @@ Le serveur démarre sur `http://localhost:3000`
 
 ### 4. Démarrage Frontend
 
-Ouvrir `frontend/index.html` dans un navigateur ou utiliser un serveur local :
-
+**Option 1: Double-clic (Simple)**
 ```bash
-# Option 1: Python
+# Ouvrir frontend/index.html dans votre navigateur
+```
+
+**Option 2: Serveur local (Recommandé)**
+
+**Linux/macOS :**
+```bash
+cd frontend
+python3 -m http.server 5500
+# OU
+npx http-server . -p 5500
+```
+
+**Windows :**
+```powershell
 cd frontend
 python -m http.server 5500
+# OU
+npx http-server . -p 5500
+```
 
-# Option 2: Node.js (http-server)
-npx http-server frontend -p 5500
-
-# Option 3: VS Code Live Server
-# Clic droit sur index.html > "Open with Live Server"
+**Option 3: VS Code Live Server**
+```
+Clic droit sur index.html > "Open with Live Server"
 ```
 
 Le frontend est accessible sur `http://localhost:5500`
@@ -176,6 +218,7 @@ Les prompts sont configurés dans `backend/src/services/prompt.service.ts` pour 
 
 ### Test Backend
 
+**Linux/macOS :**
 ```bash
 cd backend
 npm run dev
@@ -184,8 +227,18 @@ npm run dev
 curl http://localhost:3000/api/menu/health
 ```
 
+**Windows :**
+```powershell
+cd backend
+npm run dev
+
+# Dans un autre terminal PowerShell
+Invoke-RestMethod -Uri "http://localhost:3000/api/menu/health" -Method Get | ConvertTo-Json
+```
+
 ### Test Analyse
 
+**Linux/macOS :**
 ```bash
 curl -X POST http://localhost:3000/api/menu/analyze \
   -H "Content-Type: application/json" \
@@ -193,6 +246,36 @@ curl -X POST http://localhost:3000/api/menu/analyze \
     "plat": "Steak Frites",
     "ingredients": ["Boeuf 200g", "Pommes de terre 300g"]
   }'
+```
+
+**Windows :**
+```powershell
+$body = @{
+    plat = "Steak Frites"
+    ingredients = @("Boeuf 200g", "Pommes de terre 300g")
+} | ConvertTo-Json
+
+Invoke-RestMethod -Uri "http://localhost:3000/api/menu/analyze" -Method Post -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 10
+```
+
+### Scripts de Test Automatiques
+
+**Linux/macOS :**
+```bash
+# Installation automatique
+./install.sh
+
+# Tests API complets
+./test-api.sh
+```
+
+**Windows :**
+```powershell
+# Installation automatique
+.\install.ps1
+
+# Tests API complets
+.\test-api.ps1
 ```
 
 ## 📊 Données et Sources
@@ -248,7 +331,24 @@ curl -X POST http://localhost:3000/api/menu/analyze \
 
 Ce projet est un MVP de hackathon. Les contributions sont les bienvenues !
 
+**Linux/macOS :**
 ```bash
+# Fork le projet
+git clone https://github.com/votre-username/hack-the-fork.git
+cd hack-the-fork
+
+# Créer une branche
+git checkout -b feature/ma-fonctionnalite
+
+# Commit et push
+git commit -m "Ajout de ma fonctionnalité"
+git push origin feature/ma-fonctionnalite
+
+# Créer une Pull Request
+```
+
+**Windows :**
+```powershell
 # Fork le projet
 git clone https://github.com/votre-username/hack-the-fork.git
 cd hack-the-fork

@@ -4,20 +4,52 @@
 
 ### 1. Installer Node.js
 
-**Node.js n'est pas détecté sur votre système. Vous devez l'installer :**
+**Si Node.js n'est pas installé sur votre système :**
 
+**Linux (Ubuntu/Debian) :**
+```bash
+# Mettre à jour les paquets
+sudo apt update
+
+# Installer Node.js et npm
+sudo apt install nodejs npm
+
+# Vérifier l'installation
+node --version
+npm --version
+```
+
+**macOS :**
+```bash
+# Avec Homebrew (recommandé)
+brew install node
+
+# Vérifier l'installation
+node --version
+npm --version
+```
+
+**Windows :**
 1. Télécharger Node.js depuis : https://nodejs.org/
 2. Choisir la version **LTS** (Long Term Support)
 3. Exécuter l'installateur
-4. Redémarrer votre terminal/PowerShell après l'installation
+4. Redémarrer votre terminal après l'installation
 
 **Vérifier l'installation :**
-```powershell
+
+**Linux/macOS :**
+```bash
 node --version
 # Devrait afficher : v18.x.x ou v20.x.x
 
 npm --version
 # Devrait afficher : 9.x.x ou 10.x.x
+```
+
+**Windows :**
+```powershell
+node --version
+npm --version
 ```
 
 ---
@@ -26,7 +58,8 @@ npm --version
 
 ### Étape 1 : Installation Backend
 
-```powershell
+**Linux/macOS :**
+```bash
 # Aller dans le dossier backend
 cd backend
 
@@ -41,6 +74,15 @@ npm install
 # - @types/* (types TypeScript)
 ```
 
+**Windows :**
+```powershell
+# Aller dans le dossier backend
+cd backend
+
+# Installer les dépendances
+npm install
+```
+
 **Temps estimé :** 2-3 minutes
 
 **Résultat attendu :**
@@ -50,15 +92,28 @@ added 250 packages in 2m
 
 ### Étape 2 : Configuration
 
-```powershell
+**Linux/macOS :**
+```bash
 # Le fichier .env existe déjà dans backend/
 # Vous pouvez l'éditer pour ajouter votre clé API Blackbox (optionnel)
 
+# Ouvrir le fichier .env avec nano
+nano .env
+
+# OU avec vim
+vim .env
+
+# Ajouter votre clé API (si vous en avez une)
+# BLACKBOX_API_KEY=votre_cle_api_ici
+```
+
+**Windows :**
+```powershell
 # Ouvrir le fichier .env
 notepad .env
 
 # Ajouter votre clé API (si vous en avez une)
-BLACKBOX_API_KEY=votre_cle_api_ici
+# BLACKBOX_API_KEY=votre_cle_api_ici
 ```
 
 **Sans clé API :** L'application fonctionne en mode démo avec des données fictives.
@@ -69,7 +124,7 @@ BLACKBOX_API_KEY=votre_cle_api_ici
 
 ### Test 1 : Compilation TypeScript
 
-```powershell
+```bash
 # Dans le dossier backend
 npm run build
 ```
@@ -85,7 +140,7 @@ npm run build
 
 ### Test 2 : Démarrage du Serveur
 
-```powershell
+```bash
 # Dans le dossier backend
 npm run dev
 ```
@@ -115,8 +170,15 @@ npm run dev
 
 ### Test 3 : Health Check
 
-**Ouvrir un NOUVEAU terminal PowerShell** (laisser le serveur tourner)
+**Ouvrir un NOUVEAU terminal** (laisser le serveur tourner)
 
+**Linux/macOS :**
+```bash
+# Test avec curl
+curl http://localhost:3000/api/menu/health
+```
+
+**Windows :**
 ```powershell
 # Test avec Invoke-RestMethod
 Invoke-RestMethod -Uri "http://localhost:3000/api/menu/health" -Method Get | ConvertTo-Json
@@ -137,6 +199,18 @@ Invoke-RestMethod -Uri "http://localhost:3000/api/menu/health" -Method Get | Con
 
 ### Test 4 : Analyse d'un Plat
 
+**Linux/macOS :**
+```bash
+# Envoyer la requête avec curl
+curl -X POST http://localhost:3000/api/menu/analyze \
+  -H "Content-Type: application/json" \
+  -d '{
+    "plat": "Boeuf Bourguignon",
+    "ingredients": ["Boeuf 300g", "Carottes 200g", "Vin rouge 200ml"]
+  }'
+```
+
+**Windows :**
 ```powershell
 # Créer le body de la requête
 $body = @{
@@ -194,8 +268,22 @@ Invoke-RestMethod -Uri "http://localhost:3000/api/menu/analyze" -Method Post -Bo
 ```
 
 **Option B : Serveur local (Recommandé)**
+
+**Linux/macOS :**
+```bash
+# Avec Python 3
+cd frontend
+python3 -m http.server 5500
+
+# OU avec Node.js
+npx http-server . -p 5500
+
+# Ouvrir http://localhost:5500 dans le navigateur
+```
+
+**Windows :**
 ```powershell
-# Avec Python (si installé)
+# Avec Python
 cd frontend
 python -m http.server 5500
 

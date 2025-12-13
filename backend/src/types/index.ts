@@ -42,6 +42,25 @@ export interface NutritionComparison {
   explication: string;
 }
 
+export interface SupplierInfo {
+  nom: string;
+  type: 'grossiste' | 'distributeur' | 'fabricant';
+  specialites: string[];
+  marques_disponibles: string[];
+  contact: {
+    site_web?: string;
+    telephone?: string;
+    email?: string;
+  };
+  livraison: {
+    zones: string[];
+    delai_moyen: string;
+    commande_minimum?: string;
+  };
+  prix_indicatif: 'économique' | 'moyen' | 'premium';
+  pertinence: string; // Pourquoi ce fournisseur est recommandé
+}
+
 export interface AnalysisResult {
   plat_original: string;
   ingredients_originaux: Ingredient[];
@@ -51,6 +70,7 @@ export interface AnalysisResult {
   impact_economique: ImpactEconomique;
   score_global: number;
   recommandations?: string[];
+  fournisseurs_recommandes?: SupplierInfo[];
 }
 
 export interface OCRResult {

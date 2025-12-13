@@ -560,6 +560,183 @@ body {
     margin-top: 20px;
 }
 
+/* Suppliers Section */
+.suppliers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.supplier-card {
+    background: var(--bg-color);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.supplier-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
+}
+
+.supplier-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.supplier-name {
+    font-size: 18px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.supplier-type {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.supplier-type.grossiste {
+    background: rgba(59, 130, 246, 0.2);
+}
+
+.supplier-type.distributeur {
+    background: rgba(16, 185, 129, 0.2);
+}
+
+.supplier-type.fabricant {
+    background: rgba(245, 158, 11, 0.2);
+}
+
+.supplier-body {
+    padding: 20px;
+}
+
+.supplier-section {
+    margin-bottom: 20px;
+}
+
+.supplier-section h5 {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+}
+
+.supplier-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag {
+    padding: 6px 12px;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.tag.brand {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-color: var(--primary-color);
+    color: var(--primary-dark);
+    font-weight: 600;
+}
+
+.supplier-relevance {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid var(--primary-color);
+}
+
+.supplier-info {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.info-row i {
+    color: var(--primary-color);
+    width: 20px;
+}
+
+.price-économique {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.price-moyen {
+    color: var(--warning-color);
+    font-weight: 600;
+}
+
+.price-premium {
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+.supplier-footer {
+    padding: 15px 20px;
+    background: white;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.supplier-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.supplier-link:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.supplier-link i {
+    font-size: 12px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .logo h1 {
@@ -597,5 +774,18 @@ body {
     .footer-links {
         flex-direction: column;
         gap: 15px;
+    }
+
+    .suppliers-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .supplier-footer {
+        flex-direction: column;
+    }
+
+    .supplier-link {
+        width: 100%;
+        justify-content: center;
     }
 }

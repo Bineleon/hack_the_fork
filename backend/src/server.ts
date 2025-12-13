@@ -1,11 +1,12 @@
+// Charger les variables d'environnement EN PREMIER
+import dotenv from 'dotenv';
+dotenv.config();
+
+// Maintenant importer les autres modules
 import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import path from 'path';
 import menuRoutes from './routes/menu.routes';
-
-// Charger les variables d'environnement
-dotenv.config();
 
 const app: Application = express();
 const PORT = process.env.PORT || 3000;

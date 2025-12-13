@@ -1,4 +1,5 @@
 import { Ingredient } from '../types';
+import { SUPPLIERS_DATABASE } from '../data/suppliers';
 
 export class PromptService {
   /**
@@ -9,15 +10,23 @@ export class PromptService {
       .map(ing => `${ing.nom} (${ing.quantite}${ing.unite || ''})`)
       .join(', ');
 
-    return `Tu es un expert en nutrition, impact environnemental et cuisine végétale.
+    // Liste simplifiée des fournisseurs pour réduire la taille du prompt
+    const suppliersInfo = SUPPLIERS_DATABASE.map(s => 
+      `${s.nom} (${s.type}): ${s.specialites.slice(0, 2).join(', ')} - ${s.marques.slice(0, 3).join(', ')}`
+    ).join('\n');
+
+    return `Expert en nutrition et cuisine végétale.
 
 CONTEXTE:
 Un restaurateur souhaite proposer une alternative végétale pour le plat suivant:
 - Plat: ${plat}
 - Ingrédients: ${ingredientsList}
 
+FOURNISSEURS B2B FRANCE:
+${suppliersInfo}
+
 MISSION:
-Analyse ce plat et fournis une alternative végétale complète avec tous les impacts.
+Analyse ce plat et fournis une alternative végétale complète avec tous les impacts ET recommande 2-3 fournisseurs B2B appropriés.
 
 IMPORTANT: Réponds UNIQUEMENT avec un objet JSON valide, sans texte avant ou après. Format exact:
 
@@ -68,6 +77,26 @@ IMPORTANT: Réponds UNIQUEMENT avec un objet JSON valide, sans texte avant ou ap
     "Mettre en avant l'aspect environnemental sur le menu",
     "Proposer une dégustation gratuite pour convaincre les clients",
     "Former le personnel sur les bénéfices de cette alternative"
+  ],
+  "fournisseurs_recommandes": [
+    {
+      "nom": "Nom exact du fournisseur (depuis la liste fournie)",
+      "type": "grossiste|distributeur|fabricant",
+      "specialites": ["spécialité 1", "spécialité 2"],
+      "marques_disponibles": ["Beyond Meat", "Heura"],
+      "contact": {
+        "site_web": "https://...",
+        "telephone": "+33...",
+        "email": "..."
+      },
+      "livraison": {
+        "zones": ["France métropolitaine"],
+        "delai_moyen": "24-48h",
+        "commande_minimum": "150€ HT"
+      },
+      "prix_indicatif": "économique|moyen|premium",
+      "pertinence": "Explication de pourquoi ce fournisseur est recommandé pour cette alternative (ex: 'Spécialisé en alternatives au poulet, propose Heura qui convient parfaitement')"
+    }
   ]
 }
 
@@ -79,7 +108,13 @@ RÈGLES IMPORTANTES:
 2. L'alternative doit être savoureuse et réaliste pour un restaurant
 3. Le score_global (0-100) évalue la qualité globale de l'alternative
 4. Les émissions CO2 doivent refléter la réalité (viande rouge = 20-30 kg CO2/kg, légumineuses = 0.5-2 kg CO2/kg)
-5. Réponds UNIQUEMENT avec le JSON, rien d'autre`;
+5. Pour les fournisseurs:
+   - Recommande 2-3 fournisseurs UNIQUEMENT depuis la liste fournie
+   - Choisis les fournisseurs les plus pertinents selon les ingrédients de l'alternative
+   - Privilégie les fournisseurs avec les marques premium (Beyond Meat, Heura, La Vie) si l'alternative les utilise
+   - Explique clairement pourquoi chaque fournisseur est recommandé
+   - Utilise les informations EXACTES de la liste (ne modifie pas les noms, contacts, etc.)
+6. Réponds UNIQUEMENT avec le JSON, rien d'autre`;
   }
 
   /**

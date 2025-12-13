@@ -31,9 +31,9 @@ export class BlackboxService {
             content: prompt
           }
         ],
-        model: 'gpt-4o',
+        model: 'blackboxai/meta-llama/llama-3.3-70b-instruct:free',
         temperature,
-        max_tokens: 2000
+        max_tokens: 3000
       };
 
       const response = await axios.post<BlackboxResponse>(
@@ -44,7 +44,7 @@ export class BlackboxService {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.apiKey}`
           },
-          timeout: 30000
+          timeout: 60000 // Augmenté à 60 secondes
         }
       );
 
@@ -175,6 +175,43 @@ export class BlackboxService {
         'Mettre en avant l\'impact environnemental sur le menu',
         'Proposer une dégustation pour convaincre les clients sceptiques',
         'Former le personnel sur les bénéfices nutritionnels et environnementaux'
+      ],
+      fournisseurs_recommandes: [
+        {
+          nom: 'Metro France - Gamme Végétale',
+          type: 'grossiste',
+          specialites: ['Alternatives à la viande', 'Produits laitiers végétaux'],
+          marques_disponibles: ['Beyond Meat', 'Heura', 'La Vie', 'Garden Gourmet'],
+          contact: {
+            site_web: 'https://www.metro.fr',
+            telephone: '+33 800 09 09 09'
+          },
+          livraison: {
+            zones: ['France métropolitaine'],
+            delai_moyen: '24-48h',
+            commande_minimum: 'Selon magasin'
+          },
+          prix_indicatif: 'moyen',
+          pertinence: 'Grossiste majeur avec large gamme de marques premium (Beyond Meat, Heura, La Vie) et livraison rapide'
+        },
+        {
+          nom: 'Tossolia',
+          type: 'fabricant',
+          specialites: ['Tofu', 'Tempeh', 'Seitan', 'Alternatives à la viande'],
+          marques_disponibles: ['Tossolia'],
+          contact: {
+            site_web: 'https://www.tossolia.com',
+            telephone: '+33 5 61 06 31 21',
+            email: 'contact@tossolia.com'
+          },
+          livraison: {
+            zones: ['France métropolitaine'],
+            delai_moyen: '48-72h',
+            commande_minimum: '100€ HT'
+          },
+          prix_indicatif: 'moyen',
+          pertinence: 'Fabricant français bio spécialisé en seitan et tofu, parfait pour alternatives maison de qualité'
+        }
       ]
     };
   }
