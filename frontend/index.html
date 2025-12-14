@@ -22,6 +22,9 @@
                 <h1>EZVG</h1>
             </div>
             <p class="tagline">Simplifiez votre transition végétale</p>
+            <a href="demo.html" class="demo-link" title="Voir la démo">
+                <i class="fas fa-play-circle"></i> Démo Interactive
+            </a>
         </header>
 
         <!-- Section Upload -->
@@ -123,6 +126,52 @@
                 <div id="globalScore" class="score-display"></div>
             </div>
 
+            <!-- Business Plan d'Intégration -->
+            <div class="result-card business-plan-card" id="businessPlanCard">
+                <h3 class="card-title">
+                    <i class="fas fa-briefcase"></i> Business Plan d'Intégration
+                </h3>
+                <div id="businessPlan" class="business-plan-content">
+                    <!-- Business plan header -->
+                    <div class="business-plan-header">
+                        <h4 id="businessPlanTitle"></h4>
+                        <p id="businessPlanObjective"></p>
+                        <div class="business-plan-summary">
+                            <div class="summary-item">
+                                <i class="fas fa-clock"></i>
+                                <span id="businessPlanDuration"></span>
+                            </div>
+                            <div class="summary-item">
+                                <i class="fas fa-euro-sign"></i>
+                                <span id="businessPlanInvestment"></span>
+                            </div>
+                            <div class="summary-item">
+                                <i class="fas fa-chart-line"></i>
+                                <span id="businessPlanROI"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline -->
+                    <div class="business-plan-timeline" id="businessPlanTimeline"></div>
+
+                    <!-- Étapes détaillées -->
+                    <div class="business-plan-steps" id="businessPlanSteps"></div>
+
+                    <!-- Métriques de succès -->
+                    <div class="business-plan-metrics">
+                        <h5><i class="fas fa-target"></i> Métriques de Succès</h5>
+                        <ul id="businessPlanMetrics"></ul>
+                    </div>
+
+                    <!-- Points d'attention -->
+                    <div class="business-plan-attention">
+                        <h5><i class="fas fa-exclamation-triangle"></i> Points d'Attention</h5>
+                        <ul id="businessPlanAttention"></ul>
+                    </div>
+                </div>
+            </div>
+
             <!-- Fournisseurs Recommandés -->
             <div class="result-card" id="suppliersCard">
                 <h3 class="card-title">
@@ -147,6 +196,39 @@
                 <button id="shareBtn" class="btn btn-secondary">
                     <i class="fas fa-share-alt"></i> Partager
                 </button>
+            </div>
+
+            <!-- Enquête de Satisfaction - À LA TOUTE FIN -->
+            <div class="satisfaction-survey" id="satisfactionSurvey">
+                <h4><i class="fas fa-clipboard-check"></i> <span data-i18n="satisfactionTitle">Votre avis nous intéresse</span></h4>
+                
+                <div class="satisfaction-question">
+                    <p data-i18n="satisfactionQuestion">Allez-vous utiliser cette recette dans votre restaurant ?</p>
+                    <div class="satisfaction-buttons">
+                        <button class="satisfaction-btn" data-answer="yes">
+                            <i class="fas fa-check-circle"></i> <span data-i18n="satisfactionYes">Oui</span>
+                        </button>
+                        <button class="satisfaction-btn" data-answer="no">
+                            <i class="fas fa-times-circle"></i> <span data-i18n="satisfactionNo">Non</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="satisfaction-rating">
+                    <p data-i18n="satisfactionRating">Notez cette alternative :</p>
+                    <div class="rating-stars">
+                        <i class="fas fa-star star" data-rating="1"></i>
+                        <i class="fas fa-star star" data-rating="2"></i>
+                        <i class="fas fa-star star" data-rating="3"></i>
+                        <i class="fas fa-star star" data-rating="4"></i>
+                        <i class="fas fa-star star" data-rating="5"></i>
+                    </div>
+                </div>
+                
+                <div class="satisfaction-thank-you" id="satisfactionThankYou">
+                    <i class="fas fa-heart"></i>
+                    <p data-i18n="satisfactionThankYou">Merci pour votre retour !</p>
+                </div>
             </div>
         </section>
 

@@ -61,6 +61,34 @@ export interface SupplierInfo {
   pertinence: string; // Pourquoi ce fournisseur est recommandé
 }
 
+export interface EtapeBusinessPlan {
+  numero: number;
+  titre: string;
+  description: string;
+  duree_estimee: string;
+  cout_estime?: string;
+  actions_concretes: string[];
+  kpis?: string[]; // Indicateurs de performance
+  risques_potentiels?: string[];
+  conseils_pratiques?: string[];
+}
+
+export interface BusinessPlanIntegration {
+  titre: string;
+  objectif: string;
+  duree_totale: string;
+  investissement_total?: string;
+  retour_sur_investissement_estime?: string;
+  etapes: EtapeBusinessPlan[];
+  timeline: {
+    phase: string;
+    periode: string;
+    objectifs: string[];
+  }[];
+  metriques_succes: string[];
+  points_attention: string[];
+}
+
 export interface AnalysisResult {
   plat_original: string;
   ingredients_originaux: Ingredient[];
@@ -70,6 +98,7 @@ export interface AnalysisResult {
   impact_economique: ImpactEconomique;
   score_global: number;
   recommandations?: string[];
+  business_plan?: BusinessPlanIntegration;
   fournisseurs_recommandes?: SupplierInfo[];
 }
 

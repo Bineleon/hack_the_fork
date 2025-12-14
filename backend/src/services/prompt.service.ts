@@ -54,7 +54,7 @@ JSON uniquement:
     "co2_vegetale_kg": 0.8,
     "gain_co2_kg": 4.4,
     "gain_co2_pourcent": 85,
-    "explication": "Réduction significative grâce au remplacement de la viande par des protéines végétales"
+    "explication": "Réduction significante grâce au remplacement de la viande par des protéines végétales"
   },
   "impact_economique": {
     "cout_original_euros": 12.50,
@@ -69,10 +69,115 @@ JSON uniquement:
     "Proposer une dégustation gratuite pour convaincre les clients",
     "Former le personnel sur les bénéfices de cette alternative"
   ],
+  "business_plan": {
+    "titre": "Plan d'Intégration de [Nom Alternative]",
+    "objectif": "Intégrer progressivement l'alternative végétale au menu avec succès",
+    "duree_totale": "3 mois",
+    "investissement_total": "2500-3500€",
+    "retour_sur_investissement_estime": "6-8 mois",
+    "etapes": [
+      {
+        "numero": 1,
+        "titre": "Phase de Préparation",
+        "description": "Préparation de l'équipe et des infrastructures",
+        "duree_estimee": "2 semaines",
+        "cout_estime": "500-800€",
+        "actions_concretes": [
+          "Former le chef et l'équipe de cuisine aux techniques végétales",
+          "Tester les recettes et ajuster les assaisonnements",
+          "Commander les ingrédients auprès des fournisseurs sélectionnés"
+        ],
+        "kpis": ["Nombre de tests réussis", "Satisfaction équipe (sur 10)"],
+        "risques_potentiels": ["Résistance de l'équipe", "Difficulté d'approvisionnement"],
+        "conseils_pratiques": ["Organiser une dégustation interne", "Prévoir des alternatives de fournisseurs"]
+      },
+      {
+        "numero": 2,
+        "titre": "Lancement Test",
+        "description": "Introduction en douceur avec un groupe test de clients",
+        "duree_estimee": "3 semaines",
+        "cout_estime": "800-1200€",
+        "actions_concretes": [
+          "Proposer le plat en suggestion du jour",
+          "Offrir des dégustations gratuites aux clients réguliers",
+          "Recueillir les retours clients via questionnaire"
+        ],
+        "kpis": ["Taux d'acceptation clients", "Note moyenne (sur 5)", "Nombre de commandes"],
+        "risques_potentiels": ["Faible demande initiale", "Retours négatifs"],
+        "conseils_pratiques": ["Mettre en avant les bénéfices santé et environnement", "Former le personnel de salle au discours"]
+      },
+      {
+        "numero": 3,
+        "titre": "Intégration au Menu",
+        "description": "Ajout permanent au menu avec communication ciblée",
+        "duree_estimee": "4 semaines",
+        "cout_estime": "600-900€",
+        "actions_concretes": [
+          "Intégrer le plat au menu permanent",
+          "Créer des supports marketing (photos, descriptions)",
+          "Lancer une campagne sur les réseaux sociaux"
+        ],
+        "kpis": ["Part des ventes du plat végétal", "Nouveaux clients attirés", "Mentions sur réseaux sociaux"],
+        "risques_potentiels": ["Cannibalisation des autres plats", "Coûts marketing élevés"],
+        "conseils_pratiques": ["Positionner le plat stratégiquement sur le menu", "Utiliser des visuels appétissants"]
+      },
+      {
+        "numero": 4,
+        "titre": "Optimisation Continue",
+        "description": "Amélioration basée sur les retours et les données",
+        "duree_estimee": "3 semaines",
+        "cout_estime": "600-600€",
+        "actions_concretes": [
+          "Analyser les données de vente et ajuster les portions",
+          "Optimiser les coûts avec les fournisseurs",
+          "Former continuellement l'équipe aux nouvelles techniques"
+        ],
+        "kpis": ["Marge bénéficiaire", "Taux de satisfaction client", "Réduction des coûts"],
+        "risques_potentiels": ["Baisse de qualité", "Augmentation des coûts"],
+        "conseils_pratiques": ["Maintenir un dialogue avec les fournisseurs", "Écouter les retours clients"]
+      }
+    ],
+    "timeline": [
+      {
+        "phase": "Préparation",
+        "periode": "Semaines 1-2",
+        "objectifs": ["Formation équipe", "Tests recettes", "Commandes initiales"]
+      },
+      {
+        "phase": "Test",
+        "periode": "Semaines 3-5",
+        "objectifs": ["Lancement soft", "Collecte feedback", "Ajustements"]
+      },
+      {
+        "phase": "Lancement",
+        "periode": "Semaines 6-9",
+        "objectifs": ["Menu permanent", "Marketing", "Suivi ventes"]
+      },
+      {
+        "phase": "Optimisation",
+        "periode": "Semaines 10-12",
+        "objectifs": ["Analyse données", "Optimisation coûts", "Formation continue"]
+      }
+    ],
+    "metriques_succes": [
+      "15-20% des ventes totales après 3 mois",
+      "Note moyenne client > 4.2/5",
+      "Marge bénéficiaire > 60%",
+      "Retour sur investissement en 6-8 mois",
+      "Augmentation de 10% de nouveaux clients"
+    ],
+    "points_attention": [
+      "Maintenir la qualité constante",
+      "Former régulièrement le personnel",
+      "Surveiller les coûts d'approvisionnement",
+      "Adapter selon les saisons",
+      "Communiquer les bénéfices environnementaux"
+    ]
+  },
   "fournisseurs_recommandes": [{"nom":"Nom exact","type":"grossiste","specialites":["Spé1"],"marques_disponibles":["Marque1"],"contact":{"site_web":"url","telephone":"tel"},"livraison":{"zones":["France"],"delai_moyen":"24-48h","commande_minimum":"150€"},"prix_indicatif":"moyen","pertinence":"Pourquoi"}]
 }
 
-Règles: Données réalistes CO2 (viande=20-30kg, légumes=0.5-2kg), prix FR, 2 fournisseurs liste, JSON seulement. TOUT LE TEXTE DOIT ÊTRE EN FRANÇAIS.`;
+Règles: Données réalistes CO2 (viande=20-30kg, légumes=0.5-2kg), prix FR, 2 fournisseurs liste, business_plan adapté au plat spécifique, JSON seulement. TOUT LE TEXTE DOIT ÊTRE EN FRANÇAIS.`;
   }
 
   /**
