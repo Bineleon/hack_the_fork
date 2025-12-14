@@ -2,8 +2,8 @@
 const translations = {
     fr: {
         // Header
-        appTitle: "Hack the Fork",
-        tagline: "Transformez votre menu en alternatives végétales durables",
+        appTitle: "EZVG",
+        tagline: "Simplifiez votre transition végétale",
         
         // Upload Section
         uploadTitle: "Scanner un Menu",
@@ -100,7 +100,7 @@ const translations = {
         toastCopyError: "Erreur lors de la copie",
         
         // Footer
-        footerText: "Fait avec ❤️ pour un avenir plus durable",
+        footerText: "EZVG © 2024 - Easy Veggie",
         github: "GitHub",
         documentation: "Documentation",
         contact: "Contact",
@@ -154,8 +154,8 @@ const translations = {
     
     en: {
         // Header
-        appTitle: "Hack the Fork",
-        tagline: "Transform your menu into sustainable plant-based alternatives",
+        appTitle: "EZVG",
+        tagline: "Simplify your plant-based transition",
         
         // Upload Section
         uploadTitle: "Scan a Menu",
@@ -252,7 +252,7 @@ const translations = {
         toastCopyError: "Error copying",
         
         // Footer
-        footerText: "Made with ❤️ for a more sustainable future",
+        footerText: "EZVG © 2024 - Easy Veggie",
         github: "GitHub",
         documentation: "Documentation",
         contact: "Contact",

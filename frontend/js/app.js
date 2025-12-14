@@ -729,7 +729,7 @@ function downloadReport() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `hack-the-fork-${currentData.plat_original.replace(/\s+/g, '-')}.json`;
+    a.download = `ezvg-${currentData.plat_original.replace(/\s+/g, '-')}.json`;
     a.click();
     URL.revokeObjectURL(url);
     
@@ -742,11 +742,11 @@ function shareResults() {
     
     const currentData = allAnalyses[currentAnalysisIndex];
     
-    const text = `🌱 Hack the Fork\n\n${currentData.plat_original} → ${currentData.alternative_vegetale.nom}\n\n💚 -${currentData.impact_environnemental.gain_co2_kg.toFixed(1)}kg CO2\n💰 -${currentData.impact_economique.economie_euros.toFixed(2)}€\n\nScore: ${currentData.score_global}/100`;
+    const text = `🌱 EZVG - Easy Veggie\n\n${currentData.plat_original} → ${currentData.alternative_vegetale.nom}\n\n💚 -${currentData.impact_environnemental.gain_co2_kg.toFixed(1)}kg CO2\n💰 -${currentData.impact_economique.economie_euros.toFixed(2)}€\n\nScore: ${currentData.score_global}/100`;
     
     if (navigator.share) {
         navigator.share({
-            title: 'Hack the Fork',
+            title: 'EZVG - Easy Veggie',
             text: text
         }).then(() => {
             showToast(t('toastSharedSuccess'), 'success');
