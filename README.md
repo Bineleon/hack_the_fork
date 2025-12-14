@@ -10,13 +10,23 @@ Application permettant aux restaurateurs de scanner un menu et obtenir des alter
 
 ## 🎯 Fonctionnalités
 
+### Core Features
 - ✅ **Scan de menu** - Upload d'image avec OCR (Tesseract.js)
-- ✅ **Génération d'alternatives végétales** - Via Blackbox AI
+- ✅ **Génération d'alternatives végétales** - Via Blackbox AI enrichi
 - ✅ **Comparaison nutritionnelle** - Protéines, calories, fibres
 - ✅ **Impact environnemental** - Calcul des émissions CO2 économisées
 - ✅ **Impact économique** - Calcul des économies en €
 - ✅ **Score global** - Évaluation de la qualité de l'alternative
 - ✅ **Recommandations** - Conseils personnalisés
+
+### 🆕 Nouvelles Fonctionnalités (v2.0)
+- ✅ **Base de données d'alternatives** - 20+ alternatives végétales documentées
+- ✅ **API de recherche avancée** - Filtres multiples et recommandations intelligentes
+- ✅ **Intégration Open Food Facts** - Enrichissement avec données réelles
+- ✅ **Alternative Protein Companies** - 10+ entreprises référencées
+- ✅ **Recommandations IA enrichies** - Basées sur données réelles et scoring intelligent
+- ✅ **Comparaison de produits** - Analyse comparative détaillée
+- ✅ **Suggestions automatiques** - Détection des ingrédients et suggestions adaptées
 
 ## 🏗️ Architecture
 
@@ -138,42 +148,41 @@ Le frontend est accessible sur `http://localhost:5500`
 
 ## 📡 API Endpoints
 
-### Health Check
+### Menu Analysis
 ```http
-GET /api/menu/health
+GET  /api/menu/health                    # Health check
+POST /api/menu/scan                      # Scan menu image (OCR)
+POST /api/menu/analyze                   # Analyze single dish
+POST /api/menu/batch-analyze             # Analyze multiple dishes
 ```
 
-### Scan de Menu
+### 🆕 Alternatives Database
 ```http
-POST /api/menu/scan
-Content-Type: multipart/form-data
-
-Body: { menu: <image_file> }
+GET  /api/alternatives                   # List all alternatives (with filters)
+GET  /api/alternatives/:id               # Get alternative details
+GET  /api/alternatives/protein/:type     # Get alternatives by protein type
+GET  /api/alternatives/:id/similar       # Get similar alternatives
+GET  /api/alternatives/stats             # Database statistics
+GET  /api/alternatives/top               # Top alternatives by category
+GET  /api/alternatives/protein-types     # Available protein types
+POST /api/alternatives/recommendations   # Personalized recommendations
+POST /api/alternatives/compare           # Compare multiple alternatives
+POST /api/alternatives/suggestions       # Suggestions from ingredients
 ```
 
-### Analyse d'un Plat
+### 🆕 External Data (Open Food Facts, Companies)
 ```http
-POST /api/menu/analyze
-Content-Type: application/json
-
-{
-  "plat": "Boeuf Bourguignon",
-  "ingredients": ["Boeuf 300g", "Carottes 200g", "Vin rouge 200ml"]
-}
+GET    /api/external/search-products        # Search Open Food Facts
+GET    /api/external/product/:barcode       # Get product by barcode
+GET    /api/external/vegan-alternatives/:type # Search vegan alternatives
+POST   /api/external/enrich-alternative     # Enrich alternative data
+GET    /api/external/companies              # List protein companies
+POST   /api/external/ai-recommendations     # AI-enriched recommendations
+GET    /api/external/cache/stats            # Cache statistics
+DELETE /api/external/cache                  # Clear cache
 ```
 
-### Analyse Batch
-```http
-POST /api/menu/batch-analyze
-Content-Type: application/json
-
-{
-  "plats": [
-    { "nom": "Plat 1", "ingredients": [...] },
-    { "nom": "Plat 2", "ingredients": [...] }
-  ]
-}
-```
+**📖 Documentation complète**: [API Documentation](Documentation/ALTERNATIVES_API.md)
 
 ## 🎨 Utilisation
 
@@ -280,6 +289,12 @@ Invoke-RestMethod -Uri "http://localhost:3000/api/menu/analyze" -Method Post -Bo
 
 ## 📊 Données et Sources
 
+### Base de Données d'Alternatives
+- **20+ alternatives végétales** documentées en détail
+- **8 types de protéines** couverts (bœuf, poulet, porc, poisson, œuf, lait, etc.)
+- **Informations complètes**: goût, texture, nutrition, prix, préparation, disponibilité
+- **Produits**: Seitan, Tempeh, Tofu, Jackfruit, PST, Beyond Meat, Heura, La Vie, etc.
+
 ### Émissions CO2
 - Source : ADEME (Agence de l'Environnement et de la Maîtrise de l'Énergie)
 - Viande rouge : ~20-30 kg CO2eq/kg
@@ -288,10 +303,19 @@ Invoke-RestMethod -Uri "http://localhost:3000/api/menu/analyze" -Method Post -Bo
 ### Prix
 - Source : Moyennes nationales restauration française
 - Données contextuelles via Blackbox AI
+- Prix réels des alternatives végétales
 
 ### Nutrition
 - Source : Tables CIQUAL/USDA
-- Calculs via Blackbox AI
+- **Open Food Facts** : 2M+ produits alimentaires
+- Calculs enrichis via Blackbox AI
+
+### Entreprises
+- **10+ entreprises** de protéines alternatives référencées
+- Beyond Meat, Heura, La Vie, Impossible Foods, Oatly, Tossolia, etc.
+- Informations: produits, sources de protéines, pays, sites web
+
+**📖 Catalogue complet**: [Alternatives Database](Documentation/ALTERNATIVES_DATABASE.md)
 
 ## 🛠️ Technologies
 
@@ -313,19 +337,29 @@ Invoke-RestMethod -Uri "http://localhost:3000/api/menu/analyze" -Method Post -Bo
 
 ## 🚧 Roadmap
 
-### Version 1.1 (Post-Hackathon)
-- [ ] Authentification utilisateurs
-- [ ] Sauvegarde des analyses
-- [ ] Export PDF des rapports
-- [ ] Intégration OpenFoodFacts
-- [ ] Support multi-langues
+### ✅ Version 2.0 (Actuelle)
+- ✅ Base de données d'alternatives végétales (20+)
+- ✅ API de recherche et recommandations
+- ✅ Intégration Open Food Facts
+- ✅ Alternative Protein Companies Database
+- ✅ Recommandations IA enrichies
+- ✅ Système de comparaison de produits
 
-### Version 2.0
+### Version 2.1 (En cours)
+- [ ] Ajouter 30+ alternatives supplémentaires
+- [ ] Photos des produits
+- [ ] Recettes détaillées pour chaque alternative
+- [ ] Système de notation par utilisateurs
+- [ ] Intégration CIQUAL (données françaises)
+
+### Version 3.0 (Futur)
 - [ ] Application mobile (React Native)
 - [ ] Base de données PostgreSQL
-- [ ] Dashboard restaurateur
-- [ ] API publique
-- [ ] Système de notation communautaire
+- [ ] Dashboard restaurateur avancé
+- [ ] Machine Learning pour recommandations
+- [ ] Marketplace intégrée
+- [ ] API publique avec authentification
+- [ ] Support multi-langues complet
 
 ## 🤝 Contribution
 
@@ -374,9 +408,11 @@ Développé lors du Hackathon [Nom du Hackathon] 2024
 ## 🙏 Remerciements
 
 - **Blackbox AI** - Pour l'API d'intelligence artificielle
+- **Open Food Facts** - Pour la base de données alimentaire mondiale
 - **Tesseract.js** - Pour l'OCR open-source
 - **ADEME** - Pour les données environnementales
 - **Chart.js** - Pour les graphiques
+- **Alternative Protein Companies** - Pour les données sur les entreprises
 
 ## 📞 Support
 

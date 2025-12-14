@@ -1,5 +1,10 @@
 import { Ingredient } from '../types';
 import { SUPPLIERS_DATABASE } from '../data/suppliers';
+import { 
+  findAlternativesByProtein, 
+  getAlternativeById,
+  ProteinType 
+} from '../data/plant-based-alternatives';
 
 export class PromptService {
   /**
@@ -10,12 +15,25 @@ export class PromptService {
       .map(ing => `${ing.nom} (${ing.quantite}${ing.unite || ''})`)
       .join(', ');
 
+    // Détecter le type de protéine principale
+    const proteinType = this.detectProteinType(ingredientsList);
+    
+    // Obtenir les alternatives végétales pertinentes de notre base de données
+    let alternativesInfo = '';
+    if (proteinType) {
+      const alternatives = findAlternativesByProtein(proteinType);
+      alternativesInfo = '\n\nAlternatives végétales disponibles:\n' + 
+        alternatives.slice(0, 5).map(alt => 
+          `- ${alt.nom}: ${alt.gout.description}, ${alt.texture.description} (${alt.nutrition.proteines}g protéines/100g, ${alt.prix_indicatif})`
+        ).join('\n');
+    }
+
     // Liste ultra-compacte: seulement les 6 fournisseurs les plus pertinents
     const topSuppliers = SUPPLIERS_DATABASE.slice(0, 6).map(s => 
       `${s.nom}|${s.type}|${s.marques.slice(0, 2).join(',')}`
     ).join('\n');
 
-    return `Expert cuisine végétale. Plat: ${plat}. Ingrédients: ${ingredientsList || 'standards'}
+    return `Expert cuisine végétale. Plat: ${plat}. Ingrédients: ${ingredientsList || 'standards'}${alternativesInfo}
 
 Fournisseurs: ${topSuppliers}
 
@@ -72,7 +90,55 @@ JSON uniquement:
   "fournisseurs_recommandes": [{"nom":"Nom exact","type":"grossiste","specialites":["Spé1"],"marques_disponibles":["Marque1"],"contact":{"site_web":"url","telephone":"tel"},"livraison":{"zones":["France"],"delai_moyen":"24-48h","commande_minimum":"150€"},"prix_indicatif":"moyen","pertinence":"Pourquoi"}]
 }
 
-Règles: Données réalistes CO2 (viande=20-30kg, légumes=0.5-2kg), prix FR, 2 fournisseurs liste, JSON seulement`;
+Règles: Données réalistes CO2 (viande=20-30kg, légumes=0.5-2kg), prix FR, 2 fournisseurs liste, JSON seulement
+
+IMPORTANT: Utilise les alternatives végétales listées ci-dessus pour créer une recette réaliste et savoureuse. Privilégie les alternatives avec le meilleur rapport goût/texture/nutrition/prix.`;
+  }
+
+  /**
+   * Détecter le type de protéine principale dans les ingrédients
+   */
+  private static detectProteinType(ingredientsText: string): ProteinType | null {
+    const text = ingredientsText.toLowerCase();
+    
+    const proteinMapping: { [key: string]: ProteinType } = {
+      'boeuf': 'boeuf',
+      'bœuf': 'boeuf',
+      'veau': 'boeuf',
+      'steak': 'boeuf',
+      'poulet': 'poulet',
+      'volaille': 'poulet',
+      'dinde': 'poulet',
+      'porc': 'porc',
+      'jambon': 'porc',
+      'lard': 'porc',
+      'bacon': 'porc',
+      'saucisse': 'porc',
+      'agneau': 'agneau',
+      'mouton': 'agneau',
+      'poisson': 'poisson',
+      'saumon': 'poisson',
+      'thon': 'poisson',
+      'cabillaud': 'poisson',
+      'crevette': 'fruits_de_mer',
+      'crevettes': 'fruits_de_mer',
+      'fruits de mer': 'fruits_de_mer',
+      'oeuf': 'oeuf',
+      'œuf': 'oeuf',
+      'oeufs': 'oeuf',
+      'œufs': 'oeuf',
+      'lait': 'lait',
+      'crème': 'lait',
+      'fromage': 'lait'
+    };
+
+    for (const [keyword, proteinType] of Object.entries(proteinMapping)) {
+      if (text.includes(keyword)) {
+        return proteinType;
+      }
+    }
+
+    return null;
   }
 
   /**
