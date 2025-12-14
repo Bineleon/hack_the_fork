@@ -19,7 +19,7 @@ build/
 uploads/
 *.jpg
 *.jpeg
-*.png
+# *.png
 *.gif
 *.webp
 
