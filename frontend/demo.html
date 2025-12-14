@@ -401,11 +401,12 @@
         }
 
         async function displaySuppliers() {
+            const container = document.getElementById('suppliers');
             const card = document.getElementById('suppliersCard');
-            card.style.display = 'block';
             
             // Afficher un loader pendant le chargement
-            document.getElementById('suppliers').innerHTML = `
+            card.style.display = 'block';
+            container.innerHTML = `
                 <div style="text-align: center; padding: 2rem;">
                     <div class="spinner" style="width: 40px; height: 40px; margin: 0 auto;"></div>
                     <p style="margin-top: 1rem; color: var(--text-secondary);">Chargement des fournisseurs...</p>
@@ -420,66 +421,89 @@
                     throw new Error('Erreur lors du chargement des fournisseurs');
                 }
                 
-                const suppliers = await response.json();
+                const allSuppliers = await response.json();
                 
                 // Filtrer pour avoir Soy et Metro
-                const soy = suppliers.find(s => s.id === 'soy');
-                const metro = suppliers.find(s => s.id === 'metro');
-                const selectedSuppliers = [soy, metro].filter(Boolean);
+                const soy = allSuppliers.find(s => s.id === 'soy');
+                const metro = allSuppliers.find(s => s.id === 'metro');
+                const suppliers = [soy, metro].filter(Boolean);
                 
-                if (selectedSuppliers.length === 0) {
+                if (suppliers.length === 0) {
                     throw new Error('Fournisseurs non trouvés');
                 }
                 
-                // Afficher les fournisseurs avec le même format que l'app normale
-                document.getElementById('suppliers').innerHTML = selectedSuppliers.map(supplier => `
+                // Utiliser la fonction d'affichage standard de l'app
+                container.innerHTML = suppliers.map(supplier => `
                     <div class="supplier-card">
-                        <h4 class="supplier-name">${supplier.nom}</h4>
-                        <div class="supplier-type">${supplier.type.charAt(0).toUpperCase() + supplier.type.slice(1)}</div>
-                        <div class="supplier-info-grid">
-                            <div class="supplier-info-item">
-                                <strong>Spécialités :</strong>
-                                <span>${supplier.specialites.join(', ')}</span>
-                            </div>
-                            ${supplier.marques && supplier.marques.length > 0 ? `
-                            <div class="supplier-info-item">
-                                <strong>Marques :</strong>
-                                <span>${supplier.marques.join(', ')}</span>
-                            </div>
-                            ` : ''}
-                            <div class="supplier-info-item">
-                                <strong>Livraison :</strong>
-                                <span>${supplier.livraison.delai_moyen} (${supplier.livraison.zones.join(', ')})</span>
-                            </div>
-                            <div class="supplier-info-item">
-                                <strong>Commande minimum :</strong>
-                                <span>${supplier.livraison.commande_minimum}</span>
-                            </div>
-                            ${supplier.certifications && supplier.certifications.length > 0 ? `
-                            <div class="supplier-info-item">
-                                <strong>Certifications :</strong>
-                                <span>${supplier.certifications.join(', ')}</span>
-                            </div>
-                            ` : ''}
+                        <div class="supplier-header">
+                            <h4 class="supplier-name">
+                                <i class="fas fa-store"></i> ${supplier.nom}
+                            </h4>
+                            <span class="supplier-type ${supplier.type}">${supplier.type.charAt(0).toUpperCase() + supplier.type.slice(1)}</span>
                         </div>
-                        <div class="supplier-contact">
-                            ${supplier.contact.telephone ? `
-                            <div class="contact-item">
-                                <i class="fas fa-phone"></i>
-                                <a href="tel:${supplier.contact.telephone}">${supplier.contact.telephone}</a>
+                        
+                        <div class="supplier-body">
+                            <div class="supplier-section">
+                                <h5><i class="fas fa-box"></i> Spécialités</h5>
+                                <div class="supplier-tags">
+                                    ${supplier.specialites.slice(0, 3).map(spec => 
+                                        `<span class="tag">${spec}</span>`
+                                    ).join('')}
+                                </div>
                             </div>
+                            
+                            ${supplier.marques && supplier.marques.length > 0 ? `
+                            <div class="supplier-section">
+                                <h5><i class="fas fa-tags"></i> Marques Disponibles</h5>
+                                <div class="supplier-tags">
+                                    ${supplier.marques.slice(0, 4).map(marque => 
+                                        `<span class="tag brand">${marque}</span>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            <div class="supplier-info">
+                                <div class="info-row">
+                                    <i class="fas fa-truck"></i>
+                                    <span>Livraison: ${supplier.livraison.delai_moyen}</span>
+                                </div>
+                                <div class="info-row">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>${supplier.livraison.zones.join(', ')}</span>
+                                </div>
+                                <div class="info-row">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span>Commande min.: ${supplier.livraison.commande_minimum || 'Sur devis'}</span>
+                                </div>
+                                <div class="info-row">
+                                    <i class="fas fa-euro-sign"></i>
+                                    <span class="price-${supplier.prix_indicatif}">${supplier.prix_indicatif.charAt(0).toUpperCase() + supplier.prix_indicatif.slice(1)}</span>
+                                </div>
+                                ${supplier.certifications && supplier.certifications.length > 0 ? `
+                                <div class="info-row">
+                                    <i class="fas fa-certificate"></i>
+                                    <span>${supplier.certifications.join(', ')}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="supplier-footer">
+                            ${supplier.contact.site_web ? `
+                                <a href="${supplier.contact.site_web}" target="_blank" class="supplier-link">
+                                    <i class="fas fa-globe"></i> Site web
+                                </a>
+                            ` : ''}
+                            ${supplier.contact.telephone ? `
+                                <a href="tel:${supplier.contact.telephone}" class="supplier-link">
+                                    <i class="fas fa-phone"></i> ${supplier.contact.telephone}
+                                </a>
                             ` : ''}
                             ${supplier.contact.email ? `
-                            <div class="contact-item">
-                                <i class="fas fa-envelope"></i>
-                                <a href="mailto:${supplier.contact.email}">${supplier.contact.email}</a>
-                            </div>
-                            ` : ''}
-                            ${supplier.contact.site_web ? `
-                            <div class="contact-item">
-                                <i class="fas fa-globe"></i>
-                                <a href="${supplier.contact.site_web}" target="_blank">${supplier.contact.site_web.replace('https://', '').replace('http://', '')}</a>
-                            </div>
+                                <a href="mailto:${supplier.contact.email}" class="supplier-link">
+                                    <i class="fas fa-envelope"></i> Email
+                                </a>
                             ` : ''}
                         </div>
                     </div>
@@ -488,7 +512,7 @@
             } catch (error) {
                 console.error('Erreur chargement fournisseurs:', error);
                 // Fallback en cas d'erreur
-                document.getElementById('suppliers').innerHTML = `
+                container.innerHTML = `
                     <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
                         <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
                         <p>Impossible de charger les fournisseurs.</p>
