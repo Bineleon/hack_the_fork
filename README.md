@@ -1,10 +1,10 @@
-# 🌱 Hack the Fork
+# 🌱 EZVG - Easy Veggie
 
-**MVP Hackathon - Alternative Végétale pour Restaurateurs**
+**Simplifiez votre transition végétale**
 
 Application permettant aux restaurateurs de scanner un menu et obtenir des alternatives végétales pour leurs plats, avec calcul des impacts environnementaux et économiques.
 
-![Hack the Fork](https://img.shields.io/badge/Status-MVP-green)
+![EZVG](https://img.shields.io/badge/Status-MVP-green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)
 
@@ -21,7 +21,7 @@ Application permettant aux restaurateurs de scanner un menu et obtenir des alter
 ## 🏗️ Architecture
 
 ```
-hack_the_fork/
+ezvg/
 ├── backend/                    # API Node.js + TypeScript
 │   ├── src/
 │   │   ├── server.ts          # Serveur Express
@@ -334,8 +334,8 @@ Ce projet est un MVP de hackathon. Les contributions sont les bienvenues !
 **Linux/macOS :**
 ```bash
 # Fork le projet
-git clone https://github.com/votre-username/hack-the-fork.git
-cd hack-the-fork
+git clone https://github.com/votre-username/ezvg.git
+cd ezvg
 
 # Créer une branche
 git checkout -b feature/ma-fonctionnalite
@@ -350,8 +350,8 @@ git push origin feature/ma-fonctionnalite
 **Windows :**
 ```powershell
 # Fork le projet
-git clone https://github.com/votre-username/hack-the-fork.git
-cd hack-the-fork
+git clone https://github.com/votre-username/ezvg.git
+cd ezvg
 
 # Créer une branche
 git checkout -b feature/ma-fonctionnalite
@@ -381,12 +381,12 @@ Développé lors du Hackathon [Nom du Hackathon] 2024
 ## 📞 Support
 
 Pour toute question ou problème :
-- 📧 Email : support@hackthefork.com
+- 📧 Email : support@ezvg.app
 - 💬 Discord : [Lien Discord]
-- 🐛 Issues : [GitHub Issues](https://github.com/votre-repo/hack-the-fork/issues)
+- 🐛 Issues : [GitHub Issues](https://github.com/votre-repo/ezvg/issues)
 
 ---
 
 **Fait avec 💚 pour un avenir plus durable**
 
-🌱 Hack the Fork - Transformez votre menu en végétal
+🌱 EZVG - Easy Veggie - Simplifiez votre transition végétale
