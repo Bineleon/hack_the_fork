@@ -64,6 +64,22 @@ function toggleLanguage() {
     const newLang = getCurrentLanguage() === 'fr' ? 'en' : 'fr';
     setLanguage(newLang);
     showToast(newLang === 'fr' ? '🇫🇷 Français' : '🇬🇧 English', 'success');
+    
+    // Rafraîchir l'affichage si des résultats sont présents
+    if (allAnalyses.length > 0) {
+        displayMultipleResults();
+    }
+}
+
+// Utilitaire pour récupérer le texte dans la bonne langue
+function getLocalizedText(textObj) {
+    if (!textObj) return '';
+    if (typeof textObj === 'string') return textObj;
+    if (typeof textObj === 'object') {
+        const lang = getCurrentLanguage();
+        return textObj[lang] || textObj['fr'] || textObj['en'] || '';
+    }
+    return String(textObj);
 }
 
 // Vérification de l'état de l'API
@@ -322,7 +338,7 @@ function displaySingleResult(data) {
         <ul class="ingredients-list">
             ${data.ingredients_originaux.map(ing => `
                 <li>
-                    <span>${ing.nom}</span>
+                    <span>${getLocalizedText(ing.nom)}</span>
                     <span>${ing.quantite}${ing.unite || ''}</span>
                 </li>
             `).join('')}
@@ -331,19 +347,19 @@ function displaySingleResult(data) {
     
     // Alternative végétale
     document.getElementById('veganAlternative').innerHTML = `
-        <div class="dish-name">${data.alternative_vegetale.nom}</div>
+        <div class="dish-name">${getLocalizedText(data.alternative_vegetale.nom)}</div>
         <h4>${t('ingredientsColon')}</h4>
         <ul class="ingredients-list">
             ${data.alternative_vegetale.ingredients.map(ing => `
                 <li>
-                    <span>${ing.nom}</span>
+                    <span>${getLocalizedText(ing.nom)}</span>
                     <span>${ing.quantite}${ing.unite || ''}</span>
                 </li>
             `).join('')}
         </ul>
         <div class="preparation">
             <h4><i class="fas fa-book"></i> ${t('preparationColon')}</h4>
-            <p>${data.alternative_vegetale.preparation}</p>
+            <p>${getLocalizedText(data.alternative_vegetale.preparation)}</p>
             ${data.alternative_vegetale.temps_preparation ? `
                 <p><strong>⏱️ ${t('timeColon')}</strong> ${data.alternative_vegetale.temps_preparation}</p>
             ` : ''}
@@ -414,7 +430,7 @@ function displaySuppliers(suppliers) {
                 
                 <div class="supplier-section">
                     <h5><i class="fas fa-info-circle"></i> ${t('whySupplier')}</h5>
-                    <p class="supplier-relevance">${supplier.pertinence}</p>
+                    <p class="supplier-relevance">${getLocalizedText(supplier.pertinence)}</p>
                 </div>
                 
                 <div class="supplier-info">
@@ -554,7 +570,7 @@ function displayEnvironmentalImpact(impact) {
             <div class="impact-percentage">(-${impact.gain_co2_pourcent}%)</div>
         </div>
         <div class="impact-explanation">
-            <i class="fas fa-info-circle"></i> ${impact.explication}
+            <i class="fas fa-info-circle"></i> ${getLocalizedText(impact.explication)}
         </div>
     `;
     
@@ -627,7 +643,7 @@ function displayEconomicImpact(impact) {
             <div class="impact-percentage">(-${impact.economie_pourcent}%)</div>
         </div>
         <div class="impact-explanation">
-            <i class="fas fa-info-circle"></i> ${impact.explication}
+            <i class="fas fa-info-circle"></i> ${getLocalizedText(impact.explication)}
         </div>
     `;
     
@@ -705,7 +721,7 @@ function displayRecommendations(recommendations) {
         return;
     }
     
-    container.innerHTML = recommendations.map(rec => `<li>${rec}</li>`).join('');
+    container.innerHTML = recommendations.map(rec => `<li>${getLocalizedText(rec)}</li>`).join('');
 }
 
 // Téléchargement du rapport

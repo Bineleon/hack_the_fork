@@ -306,20 +306,17 @@ const translations = {
 };
 
 // Langue actuelle (par défaut: français)
-let currentLanguage = localStorage.getItem('language') || 'fr';
+let currentLanguage = 'fr';
 
 // Fonction pour obtenir une traduction
 function t(key) {
     return translations[currentLanguage][key] || key;
 }
 
-// Fonction pour changer la langue
+// Fonction pour changer la langue (Désactivée - 100% Français)
 function setLanguage(lang) {
-    if (translations[lang]) {
-        currentLanguage = lang;
-        localStorage.setItem('language', lang);
-        updatePageLanguage();
-    }
+    currentLanguage = 'fr';
+    updatePageLanguage();
 }
 
 // Fonction pour obtenir la langue actuelle
@@ -384,13 +381,11 @@ function updatePageLanguage() {
     updateLanguageToggleButton();
 }
 
-// Fonction pour mettre à jour le bouton de langue
+// Fonction pour mettre à jour le bouton de langue (Masqué)
 function updateLanguageToggleButton() {
     const langToggle = document.getElementById('languageToggle');
     if (langToggle) {
-        langToggle.innerHTML = currentLanguage === 'fr' 
-            ? '<i class="fas fa-language"></i> EN' 
-            : '<i class="fas fa-language"></i> FR';
+        langToggle.style.display = 'none';
     }
 }
 
