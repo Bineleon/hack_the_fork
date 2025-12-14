@@ -7,6 +7,7 @@ import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import path from 'path';
 import menuRoutes from './routes/menu.routes';
+import suppliersRoutes from './routes/suppliers.routes';
 
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
@@ -30,6 +31,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 // Routes
 app.use('/api/menu', menuRoutes);
+app.use('/api/suppliers', suppliersRoutes);
 
 // Route de base
 app.get('/', (req: Request, res: Response) => {
@@ -83,6 +85,8 @@ app.listen(PORT, () => {
   console.log(`   POST http://localhost:${PORT}/api/menu/scan`);
   console.log(`   POST http://localhost:${PORT}/api/menu/analyze`);
   console.log(`   POST http://localhost:${PORT}/api/menu/batch-analyze`);
+  console.log(`   GET  http://localhost:${PORT}/api/suppliers`);
+  console.log(`   GET  http://localhost:${PORT}/api/suppliers/:id`);
   console.log('');
   console.log('🌱 ========================================');
   console.log('');

@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EZVG - Démo Hackathon</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <img src="logo.png" alt="EZVG Logo" class="logo-image">
+                <h1>EZVG</h1>
+            </div>
+            <p class="tagline">Démo Interactive - Hackathon</p>
+        </header>
+
+        <!-- Section Loading -->
+        <section class="loading-section" id="loadingSection">
+            <div class="loading-card">
+                <div class="spinner"></div>
+                <h3>Scan du menu en cours...</h3>
+                <p id="loadingText">Extraction des plats du menu</p>
+            </div>
+        </section>
+
+        <!-- Section Résultats (sera remplie automatiquement) -->
+        <section class="results-section hidden" id="resultsSection">
+            <!-- Le contenu sera identique à index.html -->
+            <div class="results-header">
+                <h2><i class="fas fa-check-circle"></i> Résultats de l'analyse</h2>
+                <a href="index.html" class="btn btn-secondary">
+                    <i class="fas fa-home"></i> Retour à l'accueil
+                </a>
+            </div>
+
+            <!-- Plat Original -->
+            <div class="result-card">
+                <h3 class="card-title">
+                    <i class="fas fa-utensils"></i> Plat Original
+                </h3>
+                <div id="originalDish" class="dish-info"></div>
+            </div>
+
+            <!-- Alternative Végétale -->
+            <div class="result-card highlight">
+                <h3 class="card-title">
+                    <i class="fas fa-seedling"></i> Alternative Végétale
+                </h3>
+                <div id="veganAlternative" class="dish-info"></div>
+            </div>
+
+            <!-- Comparaison Nutritionnelle -->
+            <div class="result-card">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-bar"></i> Comparaison Nutritionnelle
+                </h3>
+                <div id="nutritionComparison" class="comparison-grid"></div>
+                <canvas id="nutritionChart" class="chart"></canvas>
+            </div>
+
+            <!-- Impact Environnemental -->
+            <div class="result-card impact-card">
+                <h3 class="card-title">
+                    <i class="fas fa-leaf"></i> Impact Environnemental
+                </h3>
+                <div id="environmentalImpact" class="impact-grid"></div>
+                <canvas id="co2Chart" class="chart"></canvas>
+            </div>
+
+            <!-- Impact Économique -->
+            <div class="result-card impact-card">
+                <h3 class="card-title">
+                    <i class="fas fa-euro-sign"></i> Impact Économique
+                </h3>
+                <div id="economicImpact" class="impact-grid"></div>
+                <canvas id="costChart" class="chart"></canvas>
+            </div>
+
+            <!-- Score Global -->
+            <div class="result-card score-card">
+                <h3 class="card-title">
+                    <i class="fas fa-star"></i> Score Global
+                </h3>
+                <div id="globalScore" class="score-display"></div>
+            </div>
+
+            <!-- Business Plan d'Intégration -->
+            <div class="result-card business-plan-card" id="businessPlanCard">
+                <h3 class="card-title">
+                    <i class="fas fa-briefcase"></i> Business Plan d'Intégration
+                </h3>
+                <div id="businessPlan" class="business-plan-content">
+                    <div class="business-plan-header">
+                        <h4 id="businessPlanTitle"></h4>
+                        <p id="businessPlanObjective"></p>
+                        <div class="business-plan-summary">
+                            <div class="summary-item">
+                                <i class="fas fa-clock"></i>
+                                <span id="businessPlanDuration"></span>
+                            </div>
+                            <div class="summary-item">
+                                <i class="fas fa-euro-sign"></i>
+                                <span id="businessPlanInvestment"></span>
+                            </div>
+                            <div class="summary-item">
+                                <i class="fas fa-chart-line"></i>
+                                <span id="businessPlanROI"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="business-plan-timeline" id="businessPlanTimeline"></div>
+                    <div class="business-plan-steps" id="businessPlanSteps"></div>
+                    <div class="business-plan-metrics">
+                        <h5><i class="fas fa-target"></i> Métriques de Succès</h5>
+                        <ul id="businessPlanMetrics"></ul>
+                    </div>
+                    <div class="business-plan-attention">
+                        <h5><i class="fas fa-exclamation-triangle"></i> Points d'Attention</h5>
+                        <ul id="businessPlanAttention"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fournisseurs Recommandés -->
+            <div class="result-card" id="suppliersCard">
+                <h3 class="card-title">
+                    <i class="fas fa-truck"></i> Fournisseurs B2B Recommandés
+                </h3>
+                <div id="suppliers" class="suppliers-grid"></div>
+            </div>
+
+            <!-- Recommandations -->
+            <div class="result-card">
+                <h3 class="card-title">
+                    <i class="fas fa-lightbulb"></i> Recommandations
+                </h3>
+                <ul id="recommendations" class="recommendations-list"></ul>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions">
+                <button id="downloadBtn" class="btn btn-primary">
+                    <i class="fas fa-download"></i> Télécharger le rapport
+                </button>
+                <button id="shareBtn" class="btn btn-secondary">
+                    <i class="fas fa-share-alt"></i> Partager
+                </button>
+            </div>
+
+            <!-- Enquête de Satisfaction -->
+            <div class="satisfaction-survey" id="satisfactionSurvey">
+                <h4><i class="fas fa-clipboard-check"></i> Votre avis nous intéresse</h4>
+                
+                <div class="satisfaction-question">
+                    <p>Allez-vous utiliser cette recette dans votre restaurant ?</p>
+                    <div class="satisfaction-buttons">
+                        <button class="satisfaction-btn" data-answer="yes">
+                            <i class="fas fa-check-circle"></i> Oui
+                        </button>
+                        <button class="satisfaction-btn" data-answer="no">
+                            <i class="fas fa-times-circle"></i> Non
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="satisfaction-rating">
+                    <p>Notez cette alternative :</p>
+                    <div class="rating-stars">
+                        <i class="fas fa-star star" data-rating="1"></i>
+                        <i class="fas fa-star star" data-rating="2"></i>
+                        <i class="fas fa-star star" data-rating="3"></i>
+                        <i class="fas fa-star star" data-rating="4"></i>
+                        <i class="fas fa-star star" data-rating="5"></i>
+                    </div>
+                </div>
+                
+                <div class="satisfaction-thank-you" id="satisfactionThankYou">
+                    <i class="fas fa-heart"></i>
+                    <p>Merci pour votre retour !</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>EZVG © 2024 - Easy Veggie - Démo Hackathon</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="js/i18n.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Instances des graphiques
+        let nutritionChartInstance = null;
+        let co2ChartInstance = null;
+        let costChartInstance = null;
+
+        // Auto-lancer la démo au chargement de la page
+        document.addEventListener('DOMContentLoaded', async () => {
+            await simulateDemoScan();
+        });
+
+        async function simulateDemoScan() {
+            const loadingSection = document.getElementById('loadingSection');
+            const resultsSection = document.getElementById('resultsSection');
+            const loadingText = document.getElementById('loadingText');
+            
+            // Étape 1: Scan du menu
+            loadingText.textContent = '📸 Scan du menu en cours...';
+            await sleep(1000);
+            
+            // Étape 2: Extraction des plats
+            loadingText.textContent = '🔍 Extraction des plats...';
+            await sleep(800);
+            
+            // Étape 3: Analyse
+            loadingText.textContent = '🍽️ Analyse de "Bavette de boeuf"...';
+            await sleep(1200);
+            
+            // Masquer loading et afficher résultats
+            loadingSection.classList.add('hidden');
+            resultsSection.classList.remove('hidden');
+            
+            // Charger les données de démo
+            displayDemoResults();
+            
+            // Initialiser les event listeners
+            setupDemoListeners();
+        }
+
+        function displayDemoResults() {
+            // Données de démo pour Bavette de boeuf
+            const demoData = {
+                plat_original: "Bavette de boeuf",
+                ingredients_originaux: [
+                    { nom: "Bavette de boeuf", quantite: "200", unite: "g" },
+                    { nom: "Échalotes", quantite: "50", unite: "g" },
+                    { nom: "Beurre", quantite: "20", unite: "g" },
+                    { nom: "Persil", quantite: "10", unite: "g" }
+                ],
+                alternative_vegetale: {
+                    nom: "Seitan mariné aux herbes",
+                    ingredients: [
+                        { nom: "Seitan", quantite: "200", unite: "g" },
+                        { nom: "Échalotes", quantite: "50", unite: "g" },
+                        { nom: "Huile d'olive", quantite: "20", unite: "ml" },
+                        { nom: "Herbes de Provence", quantite: "10", unite: "g" }
+                    ],
+                    preparation: "Mariner le seitan dans les herbes et l'huile d'olive pendant 2h. Faire revenir avec les échalotes jusqu'à coloration dorée. Servir chaud avec une sauce au vin rouge.",
+                    temps_preparation: "2h30 (dont 2h de marinade)"
+                },
+                nutrition: {
+                    original: { proteines: 26, calories: 250, fibres: 0 },
+                    vegetale: { proteines: 25, calories: 220, fibres: 2 },
+                    equivalence_pourcent: 95
+                },
+                impact_environnemental: {
+                    co2_original_kg: 6.4,
+                    co2_vegetale_kg: 1.0,
+                    gain_co2_kg: 5.4,
+                    gain_co2_pourcent: 85,
+                    explication: "La production de seitan émet 85% moins de CO2 que la viande de boeuf"
+                },
+                impact_economique: {
+                    cout_original_euros: 15.0,
+                    cout_vegetale_euros: 10.8,
+                    economie_euros: 4.2,
+                    economie_pourcent: 28,
+                    explication: "Le seitan coûte environ 28% moins cher que la bavette de boeuf"
+                },
+                score_global: 92
+            };
+
+            // Afficher les données
+            displayDish(demoData);
+            displayCharts(demoData);
+        }
+
+        function displayDish(data) {
+            // Plat original
+            document.getElementById('originalDish').innerHTML = `
+                <div class="dish-name">${data.plat_original}</div>
+                <h4>Ingrédients :</h4>
+                <ul class="ingredients-list">
+                    ${data.ingredients_originaux.map(ing => `
+                        <li><span>${ing.nom}</span><span>${ing.quantite}${ing.unite}</span></li>
+                    `).join('')}
+                </ul>
+            `;
+
+            // Alternative végétale
+            document.getElementById('veganAlternative').innerHTML = `
+                <div class="dish-name">${data.alternative_vegetale.nom}</div>
+                <h4>Ingrédients :</h4>
+                <ul class="ingredients-list">
+                    ${data.alternative_vegetale.ingredients.map(ing => `
+                        <li><span>${ing.nom}</span><span>${ing.quantite}${ing.unite}</span></li>
+                    `).join('')}
+                </ul>
+                <div class="preparation">
+                    <h4><i class="fas fa-book"></i> Préparation :</h4>
+                    <p>${data.alternative_vegetale.preparation}</p>
+                    <p><strong>⏱️ Temps :</strong> ${data.alternative_vegetale.temps_preparation}</p>
+                </div>
+            `;
+
+            // Nutrition
+            const nutrition = data.nutrition;
+            document.getElementById('nutritionComparison').innerHTML = `
+                <div class="comparison-item">
+                    <h4>Protéines</h4>
+                    <div class="comparison-value">${nutrition.vegetale.proteines}<span class="comparison-unit">g</span></div>
+                    <small>vs ${nutrition.original.proteines}g</small>
+                </div>
+                <div class="comparison-item">
+                    <h4>Calories</h4>
+                    <div class="comparison-value">${nutrition.vegetale.calories}<span class="comparison-unit">kcal</span></div>
+                    <small>vs ${nutrition.original.calories}kcal</small>
+                </div>
+                <div class="comparison-item">
+                    <h4>Fibres</h4>
+                    <div class="comparison-value">${nutrition.vegetale.fibres}<span class="comparison-unit">g</span></div>
+                    <small>vs ${nutrition.original.fibres}g</small>
+                </div>
+                <div class="comparison-item">
+                    <h4>Équivalence</h4>
+                    <div class="comparison-value">${nutrition.equivalence_pourcent}<span class="comparison-unit">%</span></div>
+                </div>
+            `;
+
+            // Impact environnemental
+            const env = data.impact_environnemental;
+            document.getElementById('environmentalImpact').innerHTML = `
+                <div class="impact-item">
+                    <div class="impact-label">CO2 Original</div>
+                    <div class="impact-value negative">${env.co2_original_kg.toFixed(2)} kg</div>
+                </div>
+                <div class="impact-item">
+                    <div class="impact-label">CO2 Végétal</div>
+                    <div class="impact-value positive">${env.co2_vegetale_kg.toFixed(2)} kg</div>
+                </div>
+                <div class="impact-item">
+                    <div class="impact-label">Gain CO2</div>
+                    <div class="impact-value positive">-${env.gain_co2_kg.toFixed(2)} kg</div>
+                    <div class="impact-percentage">(-${env.gain_co2_pourcent}%)</div>
+                </div>
+                <div class="impact-explanation">
+                    <i class="fas fa-info-circle"></i> ${env.explication}
+                </div>
+            `;
+
+            // Impact économique
+            const eco = data.impact_economique;
+            document.getElementById('economicImpact').innerHTML = `
+                <div class="impact-item">
+                    <div class="impact-label">Coût Original</div>
+                    <div class="impact-value negative">${eco.cout_original_euros.toFixed(2)} €</div>
+                </div>
+                <div class="impact-item">
+                    <div class="impact-label">Coût Végétal</div>
+                    <div class="impact-value positive">${eco.cout_vegetale_euros.toFixed(2)} €</div>
+                </div>
+                <div class="impact-item">
+                    <div class="impact-label">Économie</div>
+                    <div class="impact-value positive">-${eco.economie_euros.toFixed(2)} €</div>
+                    <div class="impact-percentage">(-${eco.economie_pourcent}%)</div>
+                </div>
+                <div class="impact-explanation">
+                    <i class="fas fa-info-circle"></i> ${eco.explication}
+                </div>
+            `;
+
+            // Score global
+            document.getElementById('globalScore').innerHTML = `
+                <div class="score-circle" style="--score: ${data.score_global}">
+                    <div class="score-number">${data.score_global}</div>
+                </div>
+                <div class="score-label">Score de qualité de l'alternative</div>
+            `;
+
+            // Business Plan
+            displayBusinessPlan();
+            
+            // Fournisseurs
+            displaySuppliers();
+
+            // Recommandations
+            document.getElementById('recommendations').innerHTML = `
+                <li>Alternative nutritionnellement équivalente</li>
+                <li>Réduction significative de l'empreinte carbone</li>
+                <li>Économies substantielles sur les coûts</li>
+            `;
+        }
+
+        async function displaySuppliers() {
+            const card = document.getElementById('suppliersCard');
+            card.style.display = 'block';
+            
+            // Afficher un loader pendant le chargement
+            document.getElementById('suppliers').innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <div class="spinner" style="width: 40px; height: 40px; margin: 0 auto;"></div>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">Chargement des fournisseurs...</p>
+                </div>
+            `;
+            
+            try {
+                // Appel API pour récupérer les fournisseurs
+                const response = await fetch('http://localhost:3000/api/suppliers');
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors du chargement des fournisseurs');
+                }
+                
+                const suppliers = await response.json();
+                
+                // Filtrer pour avoir Soy et Metro
+                const soy = suppliers.find(s => s.id === 'soy');
+                const metro = suppliers.find(s => s.id === 'metro');
+                const selectedSuppliers = [soy, metro].filter(Boolean);
+                
+                if (selectedSuppliers.length === 0) {
+                    throw new Error('Fournisseurs non trouvés');
+                }
+                
+                // Afficher les fournisseurs avec le même format que l'app normale
+                document.getElementById('suppliers').innerHTML = selectedSuppliers.map(supplier => `
+                    <div class="supplier-card">
+                        <h4 class="supplier-name">${supplier.nom}</h4>
+                        <div class="supplier-type">${supplier.type.charAt(0).toUpperCase() + supplier.type.slice(1)}</div>
+                        <div class="supplier-info-grid">
+                            <div class="supplier-info-item">
+                                <strong>Spécialités :</strong>
+                                <span>${supplier.specialites.join(', ')}</span>
+                            </div>
+                            ${supplier.marques && supplier.marques.length > 0 ? `
+                            <div class="supplier-info-item">
+                                <strong>Marques :</strong>
+                                <span>${supplier.marques.join(', ')}</span>
+                            </div>
+                            ` : ''}
+                            <div class="supplier-info-item">
+                                <strong>Livraison :</strong>
+                                <span>${supplier.livraison.delai_moyen} (${supplier.livraison.zones.join(', ')})</span>
+                            </div>
+                            <div class="supplier-info-item">
+                                <strong>Commande minimum :</strong>
+                                <span>${supplier.livraison.commande_minimum}</span>
+                            </div>
+                            ${supplier.certifications && supplier.certifications.length > 0 ? `
+                            <div class="supplier-info-item">
+                                <strong>Certifications :</strong>
+                                <span>${supplier.certifications.join(', ')}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                        <div class="supplier-contact">
+                            ${supplier.contact.telephone ? `
+                            <div class="contact-item">
+                                <i class="fas fa-phone"></i>
+                                <a href="tel:${supplier.contact.telephone}">${supplier.contact.telephone}</a>
+                            </div>
+                            ` : ''}
+                            ${supplier.contact.email ? `
+                            <div class="contact-item">
+                                <i class="fas fa-envelope"></i>
+                                <a href="mailto:${supplier.contact.email}">${supplier.contact.email}</a>
+                            </div>
+                            ` : ''}
+                            ${supplier.contact.site_web ? `
+                            <div class="contact-item">
+                                <i class="fas fa-globe"></i>
+                                <a href="${supplier.contact.site_web}" target="_blank">${supplier.contact.site_web.replace('https://', '').replace('http://', '')}</a>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Erreur chargement fournisseurs:', error);
+                // Fallback en cas d'erreur
+                document.getElementById('suppliers').innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                        <p>Impossible de charger les fournisseurs.</p>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">Assurez-vous que le backend est démarré (npm run dev)</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayBusinessPlan() {
+            const card = document.getElementById('businessPlanCard');
+            card.style.display = 'block';
+            
+            // Header
+            document.getElementById('businessPlanTitle').textContent = 'Plan d\'Intégration - Seitan Mariné aux Herbes';
+            document.getElementById('businessPlanObjective').textContent = 'Remplacer progressivement la bavette de boeuf par une alternative végétale premium';
+            document.getElementById('businessPlanDuration').textContent = 'Durée: 3 mois';
+            document.getElementById('businessPlanInvestment').textContent = 'Investissement: 2800€';
+            document.getElementById('businessPlanROI').textContent = 'ROI: 6-8 mois';
+            
+            // Timeline
+            document.getElementById('businessPlanTimeline').innerHTML = `
+                <h5><i class="fas fa-calendar-alt"></i> Timeline</h5>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-phase">Phase 1 : Préparation</div>
+                        <div class="timeline-period">Semaines 1-2</div>
+                        <ul class="timeline-objectives">
+                            <li>Formation de l'équipe cuisine</li>
+                            <li>Tests de recettes</li>
+                            <li>Sélection des fournisseurs</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-phase">Phase 2 : Test</div>
+                        <div class="timeline-period">Semaines 3-5</div>
+                        <ul class="timeline-objectives">
+                            <li>Lancement menu du midi uniquement</li>
+                            <li>Collecte des retours clients</li>
+                            <li>Ajustements recette</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-phase">Phase 3 : Déploiement</div>
+                        <div class="timeline-period">Semaines 6-9</div>
+                        <ul class="timeline-objectives">
+                            <li>Intégration menu complet</li>
+                            <li>Communication marketing</li>
+                            <li>Formation service</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-phase">Phase 4 : Optimisation</div>
+                        <div class="timeline-period">Semaines 10-12</div>
+                        <ul class="timeline-objectives">
+                            <li>Analyse des ventes</li>
+                            <li>Optimisation des coûts</li>
+                            <li>Extension à d'autres plats</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            // Étapes détaillées
+            document.getElementById('businessPlanSteps').innerHTML = `
+                <div class="step-card">
+                    <div class="step-header">
+                        <div class="step-number">1</div>
+                        <div class="step-title-group">
+                            <h5>Préparation & Formation</h5>
+                            <div class="step-duration"><i class="fas fa-clock"></i> 2 semaines</div>
+                        </div>
+                        <div class="step-cost">600€</div>
+                    </div>
+                    <div class="step-body">
+                        <p class="step-description">Mise en place des bases pour une intégration réussie</p>
+                        <div class="step-section">
+                            <h6><i class="fas fa-tasks"></i> Actions Concrètes</h6>
+                            <ul class="step-list actions">
+                                <li>Former 2 chefs aux techniques de préparation du seitan</li>
+                                <li>Tester 3 recettes de marinade différentes</li>
+                                <li>Commander échantillons auprès de 2 fournisseurs</li>
+                                <li>Créer la fiche technique de production</li>
+                            </ul>
+                        </div>
+                        <div class="step-section">
+                            <h6><i class="fas fa-chart-line"></i> KPIs</h6>
+                            <ul class="step-list kpis">
+                                <li>100% de l'équipe formée</li>
+                                <li>3 recettes testées et validées</li>
+                                <li>Fournisseur sélectionné</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-header">
+                        <div class="step-number">2</div>
+                        <div class="step-title-group">
+                            <h5>Lancement Test</h5>
+                            <div class="step-duration"><i class="fas fa-clock"></i> 3 semaines</div>
+                        </div>
+                        <div class="step-cost">900€</div>
+                    </div>
+                    <div class="step-body">
+                        <p class="step-description">Test en conditions réelles sur le menu du midi</p>
+                        <div class="step-section">
+                            <h6><i class="fas fa-tasks"></i> Actions Concrètes</h6>
+                            <ul class="step-list actions">
+                                <li>Proposer le plat uniquement au déjeuner (20 couverts/jour)</li>
+                                <li>Mettre en place un questionnaire de satisfaction</li>
+                                <li>Suivre les coûts réels de production</li>
+                                <li>Ajuster la recette selon les retours</li>
+                            </ul>
+                        </div>
+                        <div class="step-section">
+                            <h6><i class="fas fa-chart-line"></i> KPIs</h6>
+                            <ul class="step-list kpis">
+                                <li>Taux de satisfaction > 80%</li>
+                                <li>15-20 plats vendus/jour</li>
+                                <li>Marge brute > 65%</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-header">
+                        <div class="step-number">3</div>
+                        <div class="step-title-group">
+                            <h5>Intégration Menu Complet</h5>
+                            <div class="step-duration"><i class="fas fa-clock"></i> 4 semaines</div>
+                        </div>
+                        <div class="step-cost">800€</div>
+                    </div>
+                    <div class="step-body">
+                        <p class="step-description">Déploiement sur l'ensemble du service</p>
+                        <div class="step-section">
+                            <h6><i class="fas fa-tasks"></i> Actions Concrètes</h6>
+                            <ul class="step-list actions">
+                                <li>Ajouter au menu du soir et carte permanente</li>
+                                <li>Créer supports marketing (photos, description)</li>
+                                <li>Former le personnel de salle à la présentation</li>
+                                <li>Lancer campagne réseaux sociaux</li>
+                            </ul>
+                        </div>
+                        <div class="step-section">
+                            <h6><i class="fas fa-chart-line"></i> KPIs</h6>
+                            <ul class="step-list kpis">
+                                <li>30% des clients commandent le plat végétal</li>
+                                <li>Note moyenne > 4.2/5</li>
+                                <li>Augmentation de 15% de la clientèle végétarienne</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-header">
+                        <div class="step-number">4</div>
+                        <div class="step-title-group">
+                            <h5>Optimisation & Extension</h5>
+                            <div class="step-duration"><i class="fas fa-clock"></i> 3 semaines</div>
+                        </div>
+                        <div class="step-cost">500€</div>
+                    </div>
+                    <div class="step-body">
+                        <p class="step-description">Maximiser la rentabilité et étendre l'offre</p>
+                        <div class="step-section">
+                            <h6><i class="fas fa-tasks"></i> Actions Concrètes</h6>
+                            <ul class="step-list actions">
+                                <li>Négocier tarifs fournisseur (volume)</li>
+                                <li>Optimiser les portions et le dressage</li>
+                                <li>Identifier 2 autres plats à végétaliser</li>
+                                <li>Créer un menu "100% végétal" optionnel</li>
+                            </ul>
+                        </div>
+                        <div class="step-section">
+                            <h6><i class="fas fa-chart-line"></i> KPIs</h6>
+                            <ul class="step-list kpis">
+                                <li>Réduction coûts de 5% supplémentaires</li>
+                                <li>2 nouveaux plats végétaux au menu</li>
+                                <li>Chiffre d'affaires végétal > 25%</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Métriques de succès
+            document.getElementById('businessPlanMetrics').innerHTML = `
+                <li>Satisfaction client maintenue > 85%</li>
+                <li>Réduction de 30% de l'empreinte carbone du restaurant</li>
+                <li>Économie de 1200€/mois sur les achats viande</li>
+                <li>Augmentation de 20% de la clientèle végétarienne/flexitarienne</li>
+                <li>Retour sur investissement atteint en 6 mois</li>
+            `;
+            
+            // Points d'attention
+            document.getElementById('businessPlanAttention').innerHTML = `
+                <li>Former TOUTE l'équipe, pas seulement les chefs</li>
+                <li>Communiquer positivement (pas "sans viande" mais "alternative végétale premium")</li>
+                <li>Maintenir la qualité de présentation (dressage soigné)</li>
+                <li>Prévoir des stocks suffisants dès le lancement</li>
+                <li>Suivre les retours clients quotidiennement les 2 premières semaines</li>
+            `;
+        }
+
+        function displayCharts(data) {
+            // Graphique nutrition
+            const nutritionCtx = document.getElementById('nutritionChart');
+            if (nutritionChartInstance) nutritionChartInstance.destroy();
+            nutritionChartInstance = new Chart(nutritionCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Protéines (g)', 'Calories (x10)', 'Fibres (g)'],
+                    datasets: [
+                        {
+                            label: 'Original',
+                            data: [data.nutrition.original.proteines, data.nutrition.original.calories / 10, data.nutrition.original.fibres],
+                            backgroundColor: 'rgba(239, 68, 68, 0.5)',
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Végétal',
+                            data: [data.nutrition.vegetale.proteines, data.nutrition.vegetale.calories / 10, data.nutrition.vegetale.fibres],
+                            backgroundColor: 'rgba(16, 185, 129, 0.5)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'top' } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // Graphique CO2
+            const co2Ctx = document.getElementById('co2Chart');
+            if (co2ChartInstance) co2ChartInstance.destroy();
+            co2ChartInstance = new Chart(co2Ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Original', 'Végétal', 'Économisé'],
+                    datasets: [{
+                        data: [data.impact_environnemental.co2_vegetale_kg, 0, data.impact_environnemental.gain_co2_kg],
+                        backgroundColor: ['rgba(239, 68, 68, 0.7)', 'rgba(16, 185, 129, 0.7)', 'rgba(16, 185, 129, 0.3)'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // Graphique coûts
+            const costCtx = document.getElementById('costChart');
+            if (costChartInstance) costChartInstance.destroy();
+            costChartInstance = new Chart(costCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Coût Original', 'Coût Végétal', 'Économie'],
+                    datasets: [{
+                        label: 'Euros (€)',
+                        data: [data.impact_economique.cout_original_euros, data.impact_economique.cout_vegetale_euros, data.impact_economique.economie_euros],
+                        backgroundColor: ['rgba(239, 68, 68, 0.5)', 'rgba(16, 185, 129, 0.5)', 'rgba(59, 130, 246, 0.5)'],
+                        borderColor: ['rgba(239, 68, 68, 1)', 'rgba(16, 185, 129, 1)', 'rgba(59, 130, 246, 1)'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        function setupDemoListeners() {
+            // Boutons download/share
+            document.getElementById('downloadBtn').addEventListener('click', () => {
+                alert('📥 Téléchargement du rapport (fonctionnalité de démo)');
+            });
+            
+            document.getElementById('shareBtn').addEventListener('click', () => {
+                alert('📤 Partage des résultats (fonctionnalité de démo)');
+            });
+
+            // Enquête de satisfaction
+            let selectedAnswer = null;
+            let selectedRating = 0;
+            
+            document.querySelectorAll('.satisfaction-btn[data-answer]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.satisfaction-btn[data-answer]').forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedAnswer = this.dataset.answer;
+                    checkCompletion();
+                });
+            });
+            
+            document.querySelectorAll('.star').forEach(star => {
+                star.addEventListener('click', function() {
+                    selectedRating = parseInt(this.dataset.rating);
+                    document.querySelectorAll('.star').forEach((s, index) => {
+                        if (index < selectedRating) {
+                            s.classList.add('active');
+                        } else {
+                            s.classList.remove('active');
+                        }
+                    });
+                    checkCompletion();
+                });
+            });
+
+            function checkCompletion() {
+                if (selectedAnswer && selectedRating > 0) {
+                    const thankYou = document.getElementById('satisfactionThankYou');
+                    thankYou.classList.add('show');
+                    setTimeout(() => thankYou.classList.remove('show'), 3000);
+                }
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>

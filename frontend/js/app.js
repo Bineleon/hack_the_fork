@@ -29,7 +29,27 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     checkAPIHealth();
     updatePageLanguage(); // Initialiser la langue
+    
+    // Vérifier si on vient de la page démo
+    checkDemoMode();
 });
+
+// Vérifier le mode démo depuis les paramètres URL
+function checkDemoMode() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isDemo = urlParams.get('demo');
+    const platParam = urlParams.get('plat');
+    
+    if (isDemo === 'true' && platParam) {
+        // Pré-remplir le champ et lancer l'analyse automatiquement
+        platInput.value = decodeURIComponent(platParam);
+        
+        // Lancer l'analyse après un court délai
+        setTimeout(() => {
+            handleManualAnalysis();
+        }, 500);
+    }
+}
 
 // Configuration des écouteurs d'événements
 function setupEventListeners() {
@@ -168,23 +188,20 @@ async function handleFile(file) {
             return;
         }
         
-        // Analyser TOUS les plats détectés
+        // Analyser UNIQUEMENT le premier plat détecté
         allAnalyses = [];
-        const platsToAnalyze = scanData.plats.slice(0, 5); // Limiter à 5 plats max
+        const premierPlat = scanData.plats[0];
         
-        for (let i = 0; i < platsToAnalyze.length; i++) {
-            const plat = platsToAnalyze[i];
-            const analysisText = getCurrentLanguage() === 'fr' 
-                ? `Analyse ${i + 1}/${platsToAnalyze.length}: ${plat.nom}...`
-                : `Analysis ${i + 1}/${platsToAnalyze.length}: ${plat.nom}...`;
-            updateLoadingText(analysisText);
-            
-            try {
-                const analysis = await analyzeSingleMenu(plat.nom, plat.ingredients || []);
-                allAnalyses.push(analysis);
-            } catch (error) {
-                console.error(`Erreur analyse ${plat.nom}:`, error);
-            }
+        updateLoadingText(getCurrentLanguage() === 'fr' 
+            ? `Analyse de ${premierPlat.nom}...`
+            : `Analyzing ${premierPlat.nom}...`
+        );
+        
+        try {
+            const analysis = await analyzeSingleMenu(premierPlat.nom, premierPlat.ingredients || []);
+            allAnalyses.push(analysis);
+        } catch (error) {
+            console.error(`Erreur analyse ${premierPlat.nom}:`, error);
         }
         
         if (allAnalyses.length === 0) {
@@ -378,14 +395,14 @@ function displaySingleResult(data) {
     // Score global
     displayGlobalScore(data.score_global);
     
+    // Business Plan d'intégration
+    displayBusinessPlan(data.business_plan);
+    
     // Fournisseurs recommandés
     displaySuppliers(data.fournisseurs_recommandes || []);
     
     // Recommandations
     displayRecommendations(data.recommandations || []);
-    
-    // Enquête de satisfaction
-    displaySatisfactionSurvey();
     
     // Afficher la section résultats
     showResults();
@@ -715,6 +732,119 @@ function displayGlobalScore(score) {
     `;
 }
 
+// Affichage du business plan d'intégration
+function displayBusinessPlan(businessPlan) {
+    const card = document.getElementById('businessPlanCard');
+    
+    if (!businessPlan) {
+        card.style.display = 'none';
+        return;
+    }
+    
+    card.style.display = 'block';
+    
+    // Header
+    document.getElementById('businessPlanTitle').textContent = businessPlan.titre;
+    document.getElementById('businessPlanObjective').textContent = businessPlan.objectif;
+    document.getElementById('businessPlanDuration').textContent = `Durée: ${businessPlan.duree_totale}`;
+    document.getElementById('businessPlanInvestment').textContent = `Investissement: ${businessPlan.investissement_total || 'À définir'}`;
+    document.getElementById('businessPlanROI').textContent = `ROI: ${businessPlan.retour_sur_investissement_estime || 'À calculer'}`;
+    
+    // Timeline
+    const timelineContainer = document.getElementById('businessPlanTimeline');
+    if (businessPlan.timeline && businessPlan.timeline.length > 0) {
+        timelineContainer.innerHTML = `
+            <h5><i class="fas fa-calendar-alt"></i> Timeline</h5>
+            <div class="timeline">
+                ${businessPlan.timeline.map(item => `
+                    <div class="timeline-item">
+                        <div class="timeline-phase">${item.phase}</div>
+                        <div class="timeline-period">${item.periode}</div>
+                        <ul class="timeline-objectives">
+                            ${item.objectifs.map(obj => `<li>${obj}</li>`).join('')}
+                        </ul>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    // Étapes détaillées
+    const stepsContainer = document.getElementById('businessPlanSteps');
+    if (businessPlan.etapes && businessPlan.etapes.length > 0) {
+        stepsContainer.innerHTML = businessPlan.etapes.map(etape => `
+            <div class="step-card">
+                <div class="step-header">
+                    <div class="step-number">${etape.numero}</div>
+                    <div class="step-title-group">
+                        <h5>${etape.titre}</h5>
+                        <div class="step-duration">
+                            <i class="fas fa-clock"></i> ${etape.duree_estimee}
+                        </div>
+                    </div>
+                    ${etape.cout_estime ? `<div class="step-cost">${etape.cout_estime}</div>` : ''}
+                </div>
+                
+                <div class="step-body">
+                    <p class="step-description">${etape.description}</p>
+                    
+                    ${etape.actions_concretes && etape.actions_concretes.length > 0 ? `
+                        <div class="step-section">
+                            <h6><i class="fas fa-tasks"></i> Actions Concrètes</h6>
+                            <ul class="step-list actions">
+                                ${etape.actions_concretes.map(action => `<li>${action}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                    
+                    ${etape.kpis && etape.kpis.length > 0 ? `
+                        <div class="step-section">
+                            <h6><i class="fas fa-chart-line"></i> KPIs</h6>
+                            <ul class="step-list kpis">
+                                ${etape.kpis.map(kpi => `<li>${kpi}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                    
+                    ${etape.risques_potentiels && etape.risques_potentiels.length > 0 ? `
+                        <div class="step-section">
+                            <h6><i class="fas fa-exclamation-triangle"></i> Risques Potentiels</h6>
+                            <ul class="step-list risks">
+                                ${etape.risques_potentiels.map(risque => `<li>${risque}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                    
+                    ${etape.conseils_pratiques && etape.conseils_pratiques.length > 0 ? `
+                        <div class="step-section">
+                            <h6><i class="fas fa-lightbulb"></i> Conseils Pratiques</h6>
+                            <ul class="step-list tips">
+                                ${etape.conseils_pratiques.map(conseil => `<li>${conseil}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // Métriques de succès
+    const metricsContainer = document.getElementById('businessPlanMetrics');
+    if (businessPlan.metriques_succes && businessPlan.metriques_succes.length > 0) {
+        metricsContainer.innerHTML = businessPlan.metriques_succes.map(metric => 
+            `<li>${metric}</li>`
+        ).join('');
+    }
+    
+    // Points d'attention
+    const attentionContainer = document.getElementById('businessPlanAttention');
+    if (businessPlan.points_attention && businessPlan.points_attention.length > 0) {
+        attentionContainer.innerHTML = businessPlan.points_attention.map(point => 
+            `<li>${point}</li>`
+        ).join('');
+    }
+}
+
 // Affichage des recommandations
 function displayRecommendations(recommendations) {
     const container = document.getElementById('recommendations');
@@ -727,60 +857,7 @@ function displayRecommendations(recommendations) {
     container.innerHTML = recommendations.map(rec => `<li>${getLocalizedText(rec)}</li>`).join('');
 }
 
-// Affichage de l'enquête de satisfaction
-function displaySatisfactionSurvey() {
-    // Vérifier si l'enquête existe déjà
-    const existingSurvey = document.getElementById('satisfactionSurvey');
-    if (existingSurvey) {
-        existingSurvey.remove();
-    }
-    
-    // Créer le bloc d'enquête
-    const surveyHTML = `
-        <div class="satisfaction-survey" id="satisfactionSurvey">
-            <h4><i class="fas fa-clipboard-check"></i> ${t('satisfactionTitle')}</h4>
-            
-            <div class="satisfaction-question">
-                <p>${t('satisfactionQuestion')}</p>
-                <div class="satisfaction-buttons">
-                    <button class="satisfaction-btn" data-answer="yes">
-                        <i class="fas fa-check-circle"></i> ${t('satisfactionYes')}
-                    </button>
-                    <button class="satisfaction-btn" data-answer="no">
-                        <i class="fas fa-times-circle"></i> ${t('satisfactionNo')}
-                    </button>
-                </div>
-            </div>
-            
-            <div class="satisfaction-rating">
-                <p>${t('satisfactionRating')}</p>
-                <div class="rating-stars">
-                    <i class="fas fa-star star" data-rating="1"></i>
-                    <i class="fas fa-star star" data-rating="2"></i>
-                    <i class="fas fa-star star" data-rating="3"></i>
-                    <i class="fas fa-star star" data-rating="4"></i>
-                    <i class="fas fa-star star" data-rating="5"></i>
-                </div>
-            </div>
-            
-            <div class="satisfaction-thank-you" id="satisfactionThankYou">
-                <i class="fas fa-heart"></i>
-                <p>${t('satisfactionThankYou')}</p>
-            </div>
-        </div>
-    `;
-    
-    // Insérer l'enquête après les actions (boutons Télécharger/Partager)
-    const actionsDiv = document.querySelector('.actions');
-    if (actionsDiv) {
-        actionsDiv.insertAdjacentHTML('afterend', surveyHTML);
-        
-        // Ajouter les event listeners
-        setupSatisfactionListeners();
-    }
-}
-
-// Configuration des event listeners pour l'enquête
+// Configuration des event listeners pour l'enquête de satisfaction
 function setupSatisfactionListeners() {
     let selectedAnswer = null;
     let selectedRating = 0;
@@ -940,6 +1017,12 @@ function showResults() {
     uploadSection.classList.add('hidden');
     loadingSection.classList.add('hidden');
     resultsSection.classList.remove('hidden');
+    
+    // Initialiser les event listeners de l'enquête de satisfaction (statique dans HTML)
+    setTimeout(() => {
+        setupSatisfactionListeners();
+    }, 100);
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
