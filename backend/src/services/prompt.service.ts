@@ -72,7 +72,7 @@ JSON uniquement:
   "fournisseurs_recommandes": [{"nom":"Nom exact","type":"grossiste","specialites":["Spé1"],"marques_disponibles":["Marque1"],"contact":{"site_web":"url","telephone":"tel"},"livraison":{"zones":["France"],"delai_moyen":"24-48h","commande_minimum":"150€"},"prix_indicatif":"moyen","pertinence":"Pourquoi"}]
 }
 
-Règles: Données réalistes CO2 (viande=20-30kg, légumes=0.5-2kg), prix FR, 2 fournisseurs liste, JSON seulement`;
+Règles: Données réalistes CO2 (viande=20-30kg, légumes=0.5-2kg), prix FR, 2 fournisseurs liste, JSON seulement. TOUT LE TEXTE DOIT ÊTRE EN FRANÇAIS.`;
   }
 
   /**
