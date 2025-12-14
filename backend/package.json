@@ -1,7 +1,7 @@
 {
-  "name": "hack-the-fork-backend",
+  "name": "ezvg-backend",
   "version": "1.0.0",
-  "description": "Backend API pour Hack the Fork - Alternative végétale pour restaurateurs",
+  "description": "Backend API pour EZVG (Easy Veggie) - Simplifiez votre transition végétale",
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
@@ -9,7 +9,7 @@
     "start": "node dist/server.js",
     "test": "echo \"No tests yet\""
   },
-  "keywords": ["hackathon", "vegan", "restaurant", "sustainability"],
+  "keywords": ["plant-based", "vegan", "restaurant", "sustainability", "easy-veggie", "ezvg"],
   "author": "",
   "license": "MIT",
   "dependencies": {
