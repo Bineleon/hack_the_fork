@@ -198,8 +198,10 @@ async function handleFile(file) {
         displayMultipleResults();
         
     } catch (error) {
-        console.error('Erreur:', error);
-        showToast(t('toastScanError'), 'error');
+        console.error('Erreur complète:', error);
+        console.error('Message d\'erreur:', error.message);
+        console.error('Stack:', error.stack);
+        showToast(t('toastScanError') + ': ' + error.message, 'error');
         hideLoading();
     }
 }
@@ -383,6 +385,9 @@ function displaySingleResult(data) {
     
     // Recommandations
     displayRecommendations(data.recommandations || []);
+    
+    // Enquête de satisfaction
+    displaySatisfactionSurvey();
     
     // Afficher la section résultats
     showResults();
@@ -722,6 +727,144 @@ function displayRecommendations(recommendations) {
     }
     
     container.innerHTML = recommendations.map(rec => `<li>${getLocalizedText(rec)}</li>`).join('');
+}
+
+// Affichage de l'enquête de satisfaction
+function displaySatisfactionSurvey() {
+    // Vérifier si l'enquête existe déjà
+    const existingSurvey = document.getElementById('satisfactionSurvey');
+    if (existingSurvey) {
+        existingSurvey.remove();
+    }
+    
+    // Créer le bloc d'enquête
+    const surveyHTML = `
+        <div class="satisfaction-survey" id="satisfactionSurvey">
+            <h4><i class="fas fa-clipboard-check"></i> ${t('satisfactionTitle')}</h4>
+            
+            <div class="satisfaction-question">
+                <p>${t('satisfactionQuestion')}</p>
+                <div class="satisfaction-buttons">
+                    <button class="satisfaction-btn" data-answer="yes">
+                        <i class="fas fa-check-circle"></i> ${t('satisfactionYes')}
+                    </button>
+                    <button class="satisfaction-btn" data-answer="no">
+                        <i class="fas fa-times-circle"></i> ${t('satisfactionNo')}
+                    </button>
+                </div>
+            </div>
+            
+            <div class="satisfaction-rating">
+                <p>${t('satisfactionRating')}</p>
+                <div class="rating-stars">
+                    <i class="fas fa-star star" data-rating="1"></i>
+                    <i class="fas fa-star star" data-rating="2"></i>
+                    <i class="fas fa-star star" data-rating="3"></i>
+                    <i class="fas fa-star star" data-rating="4"></i>
+                    <i class="fas fa-star star" data-rating="5"></i>
+                </div>
+            </div>
+            
+            <div class="satisfaction-thank-you" id="satisfactionThankYou">
+                <i class="fas fa-heart"></i>
+                <p>${t('satisfactionThankYou')}</p>
+            </div>
+        </div>
+    `;
+    
+    // Insérer l'enquête après les actions (boutons Télécharger/Partager)
+    const actionsDiv = document.querySelector('.actions');
+    if (actionsDiv) {
+        actionsDiv.insertAdjacentHTML('afterend', surveyHTML);
+        
+        // Ajouter les event listeners
+        setupSatisfactionListeners();
+    }
+}
+
+// Configuration des event listeners pour l'enquête
+function setupSatisfactionListeners() {
+    let selectedAnswer = null;
+    let selectedRating = 0;
+    
+    // Boutons Oui/Non
+    const answerButtons = document.querySelectorAll('.satisfaction-btn[data-answer]');
+    answerButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Retirer la sélection des autres boutons
+            answerButtons.forEach(b => b.classList.remove('selected'));
+            // Ajouter la sélection au bouton cliqué
+            this.classList.add('selected');
+            selectedAnswer = this.dataset.answer;
+            
+            // Vérifier si on peut afficher le message de remerciement
+            checkSurveyCompletion(selectedAnswer, selectedRating);
+        });
+    });
+    
+    // Étoiles de notation
+    const stars = document.querySelectorAll('.star');
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.dataset.rating);
+            selectedRating = rating;
+            
+            // Mettre à jour l'affichage des étoiles
+            stars.forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+            
+            // Vérifier si on peut afficher le message de remerciement
+            checkSurveyCompletion(selectedAnswer, selectedRating);
+        });
+        
+        // Effet hover
+        star.addEventListener('mouseenter', function() {
+            const rating = parseInt(this.dataset.rating);
+            stars.forEach((s, index) => {
+                if (index < rating) {
+                    s.style.color = '#fbbf24';
+                }
+            });
+        });
+        
+        star.addEventListener('mouseleave', function() {
+            stars.forEach((s, index) => {
+                if (index < selectedRating) {
+                    s.style.color = '#fbbf24';
+                } else {
+                    s.style.color = '#d1d5db';
+                }
+            });
+        });
+    });
+}
+
+// Vérifier si l'enquête est complète et afficher le message de remerciement
+function checkSurveyCompletion(answer, rating) {
+    if (answer && rating > 0) {
+        // Afficher le message de remerciement
+        const thankYouDiv = document.getElementById('satisfactionThankYou');
+        if (thankYouDiv) {
+            thankYouDiv.classList.add('show');
+            
+            // Log les données (pour analyse future)
+            console.log('📊 Enquête de satisfaction:', {
+                utilisera_recette: answer === 'yes',
+                note: rating,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Masquer le message après 3 secondes
+            setTimeout(() => {
+                thankYouDiv.classList.remove('show');
+            }, 3000);
+        }
+    }
 }
 
 // Téléchargement du rapport

@@ -13,11 +13,31 @@ import externalDataRoutes from './routes/external-data.routes';
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+// Middleware CORS - Accepter plusieurs origines
+const allowedOrigins = [
+  'http://localhost:5500',
+  'http://localhost:8080',
+  'http://0.0.0.0:8080',
+  'http://127.0.0.1:8080',
+  'http://127.0.0.1:5500'
+];
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
+  origin: (origin, callback) => {
+    // Permettre les requêtes sans origine (comme curl, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Vérifier si l'origine est dans la liste autorisée
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`⚠️  Origine non autorisée: ${origin}`);
+      callback(null, true); // Accepter quand même en développement
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
 app.use(express.json({ limit: '50mb' }));

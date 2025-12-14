@@ -149,7 +149,15 @@ const translations = {
         savingsLabel: "Économie",
         
         // Score Label
-        scoreQualityLabel: "Score de qualité de l'alternative"
+        scoreQualityLabel: "Score de qualité de l'alternative",
+        
+        // Satisfaction Survey
+        satisfactionTitle: "Enquête de Satisfaction",
+        satisfactionQuestion: "Utiliserez-vous cette recette dans votre restaurant ?",
+        satisfactionYes: "Oui",
+        satisfactionNo: "Non",
+        satisfactionRating: "Notez cette alternative :",
+        satisfactionThankYou: "Merci pour votre retour !"
     },
     
     en: {
@@ -301,7 +309,15 @@ const translations = {
         savingsLabel: "Savings",
         
         // Score Label
-        scoreQualityLabel: "Alternative quality score"
+        scoreQualityLabel: "Alternative quality score",
+        
+        // Satisfaction Survey
+        satisfactionTitle: "Satisfaction Survey",
+        satisfactionQuestion: "Will you use this recipe in your restaurant?",
+        satisfactionYes: "Yes",
+        satisfactionNo: "No",
+        satisfactionRating: "Rate this alternative:",
+        satisfactionThankYou: "Thank you for your feedback!"
     }
 };
 

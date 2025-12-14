@@ -18,7 +18,13 @@ export class BlackboxService {
   /**
    * Appel générique à l'API Blackbox avec retry
    */
-  private async callBlackboxAPI(prompt: string, temperature: number = 0.7, retries: number = 1): Promise<string> {
+  private async callBlackboxAPI(
+    prompt: string, 
+    temperature: number = 0.7, 
+    retries: number = 1,
+    maxTokens: number = 2500,
+    timeout: number = 45000
+  ): Promise<string> {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         const request: BlackboxRequest = {
@@ -34,7 +40,7 @@ export class BlackboxService {
           ],
           model: 'blackboxai/meta-llama/llama-3.3-70b-instruct:free',
           temperature,
-          max_tokens: 2500 // Réduit pour réponse plus rapide
+          max_tokens: maxTokens
         };
 
         console.log(`🔄 Tentative ${attempt}/${retries}...`);
@@ -47,7 +53,7 @@ export class BlackboxService {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${this.apiKey}`
             },
-            timeout: 45000 // Réduit à 45 secondes pour basculer plus vite vers démo
+            timeout
           }
         );
 
@@ -59,8 +65,8 @@ export class BlackboxService {
           throw new Error(`Erreur API Blackbox: ${error.message}`);
         }
         
-        // Attendre 2 secondes avant de réessayer
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Attendre 1 seconde avant de réessayer (réduit de 2s à 1s)
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
     
@@ -102,7 +108,12 @@ export class BlackboxService {
       console.log('📄 Extraction des plats du menu...');
 
       const prompt = PromptService.buildMenuExtractionPrompt(ocrText);
-      const response = await this.callBlackboxAPI(prompt, 0.5);
+      // Paramètres optimisés pour extraction rapide:
+      // - température 0.3 (plus déterministe)
+      // - 2 retries
+      // - 1200 max_tokens (réduit pour réponse plus rapide)
+      // - 30s timeout (réduit de 45s)
+      const response = await this.callBlackboxAPI(prompt, 0.3, 2, 1200, 30000);
 
       const result = this.parseJSONResponse(response);
       console.log(`✅ ${result.plats?.length || 0} plats extraits`);

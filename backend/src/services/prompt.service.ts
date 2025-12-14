@@ -142,39 +142,21 @@ IMPORTANT: Utilise les alternatives végétales listées ci-dessus pour créer u
   }
 
   /**
-   * Génère un prompt pour extraire les plats d'un texte OCR
+   * Génère un prompt pour extraire les plats d'un texte OCR (version optimisée)
    */
   static buildMenuExtractionPrompt(ocrText: string): string {
-    return `Tu es un expert en analyse de menus de restaurant.
+    // Limiter le texte OCR à 1000 caractères pour accélérer le traitement
+    const truncatedText = ocrText.length > 1000 ? ocrText.substring(0, 1000) + '...' : ocrText;
+    
+    return `Extrais les plats principaux de ce menu. JSON uniquement.
 
-TEXTE EXTRAIT D'UN MENU:
-${ocrText}
+MENU:
+${truncatedText}
 
-MISSION:
-Extrais tous les plats principaux de ce menu avec leurs ingrédients.
+Format JSON:
+{"plats":[{"nom":"Plat","ingredients":[{"nom":"Ingrédient","quantite":"200","unite":"g"}],"categorie":"plat","prix":15.5}]}
 
-Réponds UNIQUEMENT avec un JSON valide:
-
-{
-  "plats": [
-    {
-      "nom": "nom du plat",
-      "ingredients": [
-        {"nom": "ingrédient 1", "quantite": "200", "unite": "g"},
-        {"nom": "ingrédient 2", "quantite": "100", "unite": "ml"}
-      ],
-      "categorie": "entrée|plat|dessert",
-      "prix": 15.50
-    }
-  ]
-}
-
-RÈGLES:
-1. Ignore les boissons, accompagnements seuls, et desserts simples
-2. Concentre-toi sur les plats principaux avec protéines
-3. Estime les quantités si non spécifiées (portions standards restaurant)
-4. Si le texte est illisible ou incomplet, retourne un tableau vide
-5. Réponds UNIQUEMENT avec le JSON`;
+Règles: Plats principaux uniquement, ignore boissons/desserts, estime quantités standards. JSON seulement.`;
   }
 
   /**
